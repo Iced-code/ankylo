@@ -1,5 +1,6 @@
 QWidget {
-    background-image: url("../assets/background_dark.png") 0 0 0 0 stretch stretch;
+    background-image: url("./assets/background_dark.png") 0 0 0 0 stretch stretch;
+
 }
 QWidget#container {
     background: transparent;
@@ -26,3 +27,4 @@ QListWidget {
     padding: 5px;
     font-size: 36px;
 }
+

@@ -1,23 +1,19 @@
 from flask import Flask, request, jsonify, render_template
-# from commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
+from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
 
-from backend.commands_api import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
-
-
-app = Flask(__name__)
-
-# key, vault = unlock_vault()
+#from backend.commands_api import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
 
 SESSION = {
     "key": None,
     "vault": None
 }
 
+app = Flask(__name__)
+
 @app.route("/")
 def check():
     print("HELLO!")
     return render_template("index.html")
-    return jsonify({"status": "OK"}), 200
 
 @app.route("/unlock", methods=["POST"])
 def unlock():

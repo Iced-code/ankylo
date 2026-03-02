@@ -6,8 +6,8 @@ import pyperclip
 import uuid
 
 
-from crypto import derive_key, encrypt_data, decrypt_data
-from storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
+from .crypto import derive_key, encrypt_data, decrypt_data
+from .storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
 
 
 '''
@@ -24,7 +24,7 @@ MESSAGE PROTOCOL
     }
 }
 '''
-def gen_message(status: int | str, message: str, result: dict=None, log_action: bool=True):
+def gen_message(status: int | str, message: str, result: dict=None, action: str=None, log_action: bool=True):
     if status is int:
         status = "OK"
     
@@ -32,7 +32,9 @@ def gen_message(status: int | str, message: str, result: dict=None, log_action: 
             "id": uuid.uuid4().hex[:8],
             "status": status,
             "message": message,
-            "result": result
+            "result": result,
+            "action": action,
+            "log_action": log_action
         }
 
 '''
@@ -78,7 +80,7 @@ def create_vault():
 '''
 Unlock and load vault
 '''
-def unlock_vault():
+def unlock_vault(password:str = None):
     if not vault_exists():
         print("Vault not initialized.")
         return None, None
@@ -89,7 +91,8 @@ def unlock_vault():
         print("Failed to load vault.")
         return None, None
 
-    password = getpass.getpass("Master password: ")
+    if not password:
+        password = getpass.getpass("Master password: ")
 
     salt = b64d(vault_data["kdf"]["salt"])
     nonce = b64d(vault_data["nonce"])
@@ -156,30 +159,30 @@ def delete_vault():
 '''
 Add entry to vault
 '''
-def add_entry(name):
-    key, vault = unlock_vault()
+def add_entry(name: str, api_key:str=None, key:str=None, vault=None, entry_index:int=None):
     if not key:
-        return
-
-    if name.strip() == "":
-        return gen_message(status="ERROR", message=f"Invalid name.", log_action=False)
+        key, vault = unlock_vault()
+        if not key:
+            return gen_message(status="ERROR", message=f"Invalid password.")
 
     name = name.strip()
+    if name == "":
+        return gen_message(status="ERROR", message=f"Invalid name.", log_action=False)
 
-    api_key = getpass.getpass("Enter API key (hidden): ")
+    if not api_key: 
+        api_key = getpass.getpass("Enter API key (hidden): ")
 
-    entry_index = None
-
-    for index, entry in enumerate(vault["entries"]):
-        if entry["name"].lower() == name.lower():
-            replace = input("Entry already exists. Replace key for this entry? (Y/N): ").upper() == "Y"
-            if not replace:
-                return gen_message(status="OK", message=f"", log_action=False)
-            else:
-                entry_index = index
-                break
+    if not entry_index:
+        for index, entry in enumerate(vault["entries"]):
+            if entry["name"].lower() == name.lower():
+                replace = input("Entry already exists. Replace key for this entry? (Y/N): ").upper() == "Y"
+                if not replace:
+                    return gen_message(status="OK", message=f"", log_action=False)
+                else:
+                    entry_index = index
+                    break
             
-    if entry_index != None:
+    if entry_index and entry_index != -1:
         vault["entries"][entry_index] = ({
             "name": name,
             "key": api_key
@@ -198,10 +201,11 @@ def add_entry(name):
 '''
 List all entries
 '''
-def list_entries():
-    key, vault = unlock_vault()
+def list_entries(key:str=None, vault=None):
     if not key:
-        return
+        key, vault = unlock_vault()
+        if key is None:
+            return
     
     for entry in vault["entries"]:
         print(f"- {entry["name"]}")
@@ -212,10 +216,11 @@ def list_entries():
 '''
 Get entry
 '''
-def get_entry(name):
-    key, vault = unlock_vault()
+def get_entry(name:str, key:str=None, vault=None):
     if not key:
-        return
+        key, vault = unlock_vault()
+        if not key:
+            return
     
     for entry in vault["entries"]:
         if entry["name"] == name:
@@ -224,15 +229,16 @@ def get_entry(name):
             return gen_message(status="OK", message=f"Accessed {name} entry.")
 
     print("Entry not found.")
-    return gen_message(status="ERROR", message=f"Unable to get entry {name}.", log_action=True)
+    return gen_message(status="ERROR", message=f"Unable to get entry '{name}'.", log_action=True)
 
 '''
 Get entry at the index
 '''
-def get_entry_index(index):
-    key, vault = unlock_vault()
+def get_entry_index(index, key:str=None, vault=None):
     if not key:
-        return
+        key, vault = unlock_vault()
+        if not key:
+            return
     
     index = int(index)
     if abs(index) >= len(vault["entries"]):
@@ -241,15 +247,16 @@ def get_entry_index(index):
 
     pyperclip.copy(vault["entries"][index]["key"])
     print("API Key copied to clipboard.")
-    return
+    return gen_message(status="OK", message=f"Accessed '{vault["entries"][index]["key"]}' entry.")
 
 '''
 Delete entry
 '''
-def delete_entry(name):
-    key, vault = unlock_vault()
+def delete_entry(name:str, key:str=None, vault=None):
     if not key:
-        return
+        key, vault = unlock_vault()
+        if not key:
+            return
     
     vault["entries"] = [e for e in vault["entries"] if e["name"] != name]
 
@@ -261,10 +268,11 @@ def delete_entry(name):
 '''
 Delete entry at the index
 '''
-def delete_entry_index(index):
-    key, vault = unlock_vault()
+def delete_entry_index(index, key:str=None, vault=None):
     if not key:
-        return
+        key, vault = unlock_vault()
+        if not key:
+            return
     
     index = int(index)
     if index >= len(vault["entries"]):

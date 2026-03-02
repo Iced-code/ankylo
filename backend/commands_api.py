@@ -5,8 +5,8 @@ import time
 import pyperclip
 import sys
 
-from crypto import derive_key, encrypt_data, decrypt_data
-from storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
+from .crypto import derive_key, encrypt_data, decrypt_data
+from .storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
 
 '''
 Initialize Vault
@@ -162,7 +162,7 @@ def delete_entry(name):
 
 
 
-for line in sys.stdin:
+""" for line in sys.stdin:
     data = json.loads(line)
 
     result = {
@@ -170,5 +170,5 @@ for line in sys.stdin:
     }
 
     print(json.dumps(result))
-    sys.stdout.flush()
+    sys.stdout.flush() """
     

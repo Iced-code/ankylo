@@ -1,7 +1,7 @@
 import argparse
 from datetime import datetime
 from pathlib import Path
-from commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index
+from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index
 
 
 def main():
@@ -44,7 +44,7 @@ def main():
             result = get_entry(args.name)
         else:
             result = get_entry_index(args.index)
-        output = f'Viewed "{args.name}" API key.'
+        output = result["message"]
     elif args.command == "delete":
         if args.name:
             result = delete_entry(args.name)
@@ -57,7 +57,8 @@ def main():
     print(output)
     with open(logsFilePath, "a") as logFile:
         if output.strip() != "":
-            logFile.write(f"[{datetime.now()}]: {output}\n")
+            now = datetime.now()
+            logFile.write(f"[{now.strftime("%Y-%m-%d %H:%M:%S")}]: {output}\n")
 
 
 if __name__ == "__main__":
