@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>"Artist's Interpretation" - Challenges-AM</title>
+        <link rel="stylesheet" href="../styles.css">
+        <script src="../scripts.js"></script>
+
+        <!-- SOLUTION:
+                1. Steganography encoded message. Save the image and upload it into a Steganography decoder to get the flag.
+                    >>> The_Promise_of_Balance
+                    
+                - Flag: HACKFAX{The_Promise_of_Balance}
+
+                -->
+    </head>
+    
+    <a href="../index.html"><h1>Capture the Flag (CTF) Challenges - Ayaan Modak</h1></a>
+    <hr>
+    <body>
+        <div class="challenge-name"><h1>"Artist's Interpretation"</h1><p class="difficulty category">Cryptography</p><p class="difficulty medium">Medium</p></div>
+
+        <div class="main">
+            <h2>Description</h2>
+            <p>One of the most famous paintings of Aang Memorial Island. While the artist never explicitly named it, he stated, "A picture is worth a thousand words, and perhaps a few more." Determine the title of this work of art.</p>
+            <div class="message">
+                <h2>Message:</h2> 
+                <img src="../assets/cryptography_artists-interpretation_image.png">
+            </div>
+
+            <div class="flag-format">
+                <h2>Flag Format:</h2>
+                <code>HACKFAX{deciphered_message}</code>
+            </div>
+
+            <br>
+            <h2 onclick="toggleDisplay('hint1')">Hint 1</h2>
+            <div id="hint1" style="display: none;">
+                <p>Like Badger Moles, the truth lies underneath.</p>
+            </div>
+            <h2 onclick="toggleDisplay('solution');document.getElementById('flag').style.display='none'">Solution</h2>
+            <div id="solution" style="display: none;">
+                <ol>
+                    1. Steganography encoded message. Save the image and upload it into a Steganography decoder to get the flag.
+                    <ul>&#8594    The_Promise_of_Balance</ul>
+                </ol>
+                <h2 onclick="toggleDisplay('flag');">Flag</h2>
+                <h2 id="flag" style="display: none;"><code>HACKFAX{The_Promise_of_Balance}</code></h2>
+            </div>
+        </div>
+    </body>
+</html>

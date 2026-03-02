@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>"A Taste of Home" - Challenges-AM</title>
+        <link rel="stylesheet" href="../styles.css">
+        <script src="../scripts.js"></script>
+
+        <!-- SOLUTION:
+                1. Convert Hex to ASCII:
+                    63 32 56 68 63 48 4A 31 62 6D 56 66 63 33 52 6C 64 77 3D 3D >>> c2VhcHJ1bmVfc3Rldw==
+                2. Decode from Base64 format:
+                    c2VhcHJ1bmVfc3Rldw== >>> seaprune_stew
+
+                - Flag: HACKFAX{seaprune_stew}
+                -->
+    </head>
+    
+    <a href="../index.html"><h1>Capture the Flag (CTF) Challenges - Ayaan Modak</h1></a>
+    <hr>
+    <body>
+        <div class="challenge-name"><h1>"A Taste of Home"</h1><p class="difficulty category">Cryptography</p><p class="difficulty medium">Medium</p></div>
+
+        <div class="main">
+            <h2>Description</h2>
+            <p>To protect the culture of the Southern Water Tribe, traditional recipes are often recorded in an encrypted form. You have found the following entry, now decipher it to discover a Water Tribe delicacy.</p>
+
+            <div class="message">
+                <h2>Message:</h2> 
+                <p style="margin-right: 1rem;">63 32 56 68 63 48 4A 31 62 6D 56 66 63 33 52 6C 64 77 3D 3D</p>
+            </div>
+
+            <div class="flag-format">
+                <h2>Flag Format:</h2>
+                <code>HACKFAX{deciphered_message}</code>
+            </div>
+
+            <br>
+            <h2 onclick="toggleDisplay('hint')">Hint</h2>
+            <div id="hint" style="display: none;">
+                <p>Those "=" symbols at the end must mean something more...</p>
+            </div>
+
+            <h2 onclick="toggleDisplay('solution');document.getElementById('flag').style.display='none'">Solution</h2>
+            <div id="solution" style="display: none;">
+                <ol>
+                    1. Convert Hex to ASCII:
+                    <ul>63 32 56 68 63 48 4A 31 62 6D 56 66 63 33 52 6C 64 77 3D 3D    &#8594    c2VhcHJ1bmVfc3Rldw==</ul><br>
+                    2. Decode from Base64 format:
+                    <ul>c2VhcHJ1bmVfc3Rldw==    &#8594    seaprune_stew</ul>
+                </ol>
+                <h2 onclick="toggleDisplay('flag');">Flag</h2>
+                <h2 id="flag" style="display: none;"><code>HACKFAX{seaprune_stew}</code></h2>
+            </div>
+        </div>
+    </body>
+</html>

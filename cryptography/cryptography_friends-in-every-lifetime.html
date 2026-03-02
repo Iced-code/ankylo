@@ -1,0 +1,53 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>"Friends in Every Lifetime" - Challenges-AM</title>
+        <link rel="stylesheet" href="../styles.css">
+        <script src="../scripts.js"></script>
+        
+        <!-- SOLUTION:
+                1. Reverse Vigenere Cipher. The second phrase was generated with a Vigenere cipher using the first phrase and an unknown keyword.
+                   The keyword is the flag.
+                    >>> APPAANDMOMO
+                    
+                - Flag: HACKFAX{APPAANDMOMO}
+                
+                </ol>
+                <h2 onclick="toggleDisplay('flag');">Flag</h2>
+                <h2 id="flag" style="display: none;"><code>HACKFAX{APPAANDMOMO}
+                -->
+    </head>
+    
+    <a href="../index.html"><h1>Capture the Flag (CTF) Challenges - Ayaan Modak</h1></a>
+    <hr>
+    <body>
+        <div class="challenge-name"><h1>"Friends in Every Lifetime"</h1><p class="difficulty category">Cryptography</p><p class="difficulty easy">Easy</p></div>
+
+        <div class="main">
+            <h2>Description</h2>
+            <p>In the archives of the Northern Air Temple, you stumbled upon a scroll with two strings of text. Determine the message that lies within.</p>
+            <div class="message">
+                <h2>Message:</h2> 
+                <p>AIRBENDERSBESTFRIENDS</p>
+                <p>AXGBEAGQFEPEHIFRVHZRE</p>
+            </div>
+
+            <div class="flag-format">
+                <h2>Flag Format:</h2>
+                <code>HACKFAX{deciphered_message}</code>
+            </div>
+
+            <br>
+            <h2 onclick="toggleDisplay('solution');document.getElementById('flag').style.display='none'">Solution</h2>
+            <div id="solution" style="display: none;">
+                <ol>
+                    1. Reverse Vigenere Cipher. The second phrase was generated with a Vigenere cipher using the first phrase and an unknown keyword.
+                        The keyword is the flag.
+                    <ul>&#8594    APPAANDMOMO</ul>
+                </ol>
+                <h2 onclick="toggleDisplay('flag');">Flag</h2>
+                <h2 id="flag" style="display: none;"><code>HACKFAX{APPAANDMOMO}</code></h2>
+            </div>
+        </div>
+    </body>
+</html>

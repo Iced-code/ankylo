@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>"Strange Delivery" - Challenges-AM</title>
+        <link rel="stylesheet" href="../styles.css">
+        <script src="../scripts.js"></script>
+        <!-- SOLUTION:
+                - Caesar Cipher (shift of 10 [a->k])
+                - wOOd_WO_sx-YWkCrE  --decoded to->  mEEt_ME_in-OMaShU
+
+                - Flag: HACKFAX{mEEt_ME_in-OMaShU}
+                -->
+    </head>
+    
+    <a href="../index.html"><h1>Capture the Flag (CTF) Challenges - Ayaan Modak</h1></a>
+    <hr>
+    <body>
+        <div class="challenge-name"><h1>"Strange Delivery"</h1><p class="difficulty category">Cryptography</p><p class="difficulty easy">Easy</p></div>
+
+        <div class="main">
+            <h2>Description</h2>
+            <p>You recieved an unexpected parcel with a string of random letters and "10:00" written on it. Decipher the message on the parcel to know its true meaning.</p>
+
+            <div class="message">
+                <h2>Message:</h2> 
+                <p>wOOd_WO_sx-YWkCrE</p>
+            </div>
+
+            <div class="flag-format">
+                <h2>Flag Format:</h2>
+                <code>HACKFAX{deciphered_message}</code>
+            </div>
+
+            <br>
+            <div>
+                <h2 onclick="toggleDisplay('solution');document.getElementById('flag').style.display='none'">Solution</h2>
+                <div id="solution" style="display: none;">
+                    <ol>
+                        1. Caesar Cipher (shift of 10 [a->k]):
+                        <ul>wOOd_WO_sx-YWkCrE    >>>    mEEt_ME_in-OMaShU</ul>
+                    </ol>
+                    <h2 onclick="toggleDisplay('flag');">Flag</h2>
+                    <h2 id="flag" style="display: none;"><code>HACKFAX{mEEt_ME_in-OMaShU}</code></h2>
+                </div>
+            </div>
+        </div>
+    </body>
+</html>

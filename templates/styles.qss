@@ -1,0 +1,28 @@
+QWidget {
+    background-image: url("../assets/background_dark.png") 0 0 0 0 stretch stretch;
+}
+QWidget#container {
+    background: transparent;
+}
+
+QLabel {
+    color: white;
+    font-size: 36px;
+    font-weight: bold;
+    background: transparent
+}
+
+QPushButton {
+    background-color: rgba(40,40,40,180);
+    color: white;
+    border-radius: 8px;
+    padding: 10px;
+    font-size: 14px;
+}
+
+QListWidget {
+    background-color: rgba(255,255,255,200);
+    border-radius: 8px;
+    padding: 5px;
+    font-size: 36px;
+}

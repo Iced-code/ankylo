@@ -1,0 +1,8 @@
+argon2-cffi
+cryptography
+pyperclip
+
+Pillow
+PySide6
+
+Flask
