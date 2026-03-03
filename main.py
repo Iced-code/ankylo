@@ -13,6 +13,8 @@ def error(msg: str):
 
 def info(msg: str):
     typer.secho(f"{msg}", fg=typer.colors.YELLOW, bold=True)
+def detail(msg: str):
+    typer.secho(f"{msg}", fg=typer.colors.BRIGHT_BLUE, bold=True)
 
 
 LOGSFILE = Path("./logs/logs.txt")
@@ -49,6 +51,9 @@ def add_entry_to_vault(name:str):
 @app.command("list")
 def list_vault_entries():
     result = list_entries()
+    if result["result"]:
+        for index, entry in result["result"].items():
+            detail(f'[{index}] - {entry}')
     output_message(result)
 
 @app.command("get")

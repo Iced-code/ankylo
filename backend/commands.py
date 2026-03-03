@@ -10,7 +10,7 @@ from .storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
 
 
 '''
-Called other functions to generate message protocols.
+Called to generate formatted message protocols.
 
 Args:
     status (str): Status message (or code) depending on success of function.
@@ -20,17 +20,7 @@ Args:
     log_action (bool= True): log the message of this action.
 
 Returns:
-    Message protocol formatted as dict. MESSAGE PROTOCOL format:
-        {
-            "id": uuid,
-            "status": "OK",
-            "message": "Created vault, add entry, etc."
-            "result": {
-                "key": key,
-                "vault": vault,
-                ...
-            }
-        }
+    Message protocol formatted as dict.
 '''
 def gen_message(status:str, message:str, result:dict=None, action:str=None, log_action:bool=True) -> dict:
     return {
@@ -43,7 +33,10 @@ def gen_message(status:str, message:str, result:dict=None, action:str=None, log_
         }
 
 '''
-Initializes Vault
+Initializes vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
 def create_vault():
     if vault_exists():
@@ -81,7 +74,13 @@ def create_vault():
     return gen_message("OK", "Vault initialized successfully.")
 
 '''
-Unlock and load vault
+Unlocks and loads the vault.
+
+Args:
+    password (str= None): User's master password.
+
+Returns:
+    The derived key to the vault, the decrypted vault, and formatted message protocol.
 '''
 def unlock_vault(password:str=None):
     if not vault_exists():
@@ -89,7 +88,7 @@ def unlock_vault(password:str=None):
     
     vault_data = load_vault_file()
 
-    if vault_data is None:
+    if not vault_data:
         return None, None, gen_message("ERROR", "Failed to load vault.")
 
     if not password:
@@ -106,10 +105,23 @@ def unlock_vault(password:str=None):
     except Exception:
         return None, None, gen_message("ERROR", "Incorrect password or vault corrupted.")
     
-    return key, json.loads(decrypted_vault), gen_message("OK", "Unlocked vault")
+    return key, json.loads(decrypted_vault), gen_message("OK", "Unlocked vault.")
+
+def get_encrypted_vault():
+    if not vault_exists():
+        return None, gen_message("ERROR", "Vault not initialized.")
+    
+    vault_data = load_vault_file()
+
+    if not vault_data:
+        return None, gen_message("ERROR", "Failed to load vault.")
+    
+    return vault_data, gen_message("OK", "Loaded encrypted vault.")
+def save_encrypted_vault(vault_dict:dict):
+    write_atomically(vault_dict)
 
 '''
-Save vault
+Save updates and changes to the vault.
 '''
 def save_vault(key:str, vault_dict:dict, original_data):
     data = json.dumps(vault_dict).encode()
@@ -129,14 +141,12 @@ Delete vault
 '''
 def delete_vault():
     if not vault_exists():
-        print("Vault not initialized.")
-        return None, None, gen_message("ERROR", "Vault not initialized.")
+        return gen_message("ERROR", "Vault not initialized.")
     
     vault_data = load_vault_file()
 
     if vault_data is None:
-        print("Failed to load vault.")
-        return None, None, gen_message("ERROR", "Failed to load vault.")
+        return gen_message("ERROR", "Failed to load vault.")
 
     password = getpass.getpass("Master password: ")
 
@@ -149,13 +159,12 @@ def delete_vault():
     try:
         decrypted_vault = decrypt_data(key=key, nonce=nonce, ciphertext=ciphertext)
     except Exception:
-        print("Incorrect password or vault corrupted")
-        return None, None, gen_message("ERROR", "Incorrect password or vault corrupted.")
+        return gen_message("ERROR", "Incorrect password or vault corrupted.")
     
     os.remove("./vault.json")
 
-    return
-    
+    return gen_message("OK", "Vault was deleted.")
+
 '''
 Add an entry to the vault.
 
@@ -211,7 +220,14 @@ def add_entry(name:str, api_key:str=None, key:str=None, vault:dict=None, entry_i
     return gen_message(status="OK", message=f"Added '{name}' to vault.")
 
 '''
-List all entries
+Lists all entries in the vault.
+
+Args:
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
 def list_entries(key:str=None, vault:dict=None):
     if not key:
@@ -219,15 +235,23 @@ def list_entries(key:str=None, vault:dict=None):
         if not key:
             return message
     
+    output = dict()
     print("")
     for index, entry in enumerate(vault["entries"]):
-        print(f"[{index}] - {entry["name"]}")
+        output[index] = entry["name"]
     
-    return gen_message(status="OK", message=f"Listed all vault entries.")
-
+    return gen_message(status="OK", message=f"Listed all vault entries.", result=output)
 
 '''
-Get entry
+Gets entry given its name. Entry's key is copied to the user's clipboard.
+
+Args:
+    name (str): Name of the entry to get.
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
 def get_entry(name:str, key:str=None, vault:dict=None):
     if not key:
@@ -243,15 +267,22 @@ def get_entry(name:str, key:str=None, vault:dict=None):
     return gen_message(status="ERROR", message=f"Entry '{name}' not found.", log_action=True)
 
 '''
-Get entry at the index
+Gets entry found at the given index. Entry's key is copied to the user's clipboard.
+
+Args:
+    index (int): Index of the entry to get.
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def get_entry_index(index, key:str=None, vault:dict=None):
+def get_entry_index(index: int, key:str=None, vault:dict=None):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
             return message
     
-    index = int(index)
     if abs(index) >= len(vault["entries"]):
         return gen_message("ERROR", "Invalid index for vault entry.")
 
@@ -259,7 +290,15 @@ def get_entry_index(index, key:str=None, vault:dict=None):
     return gen_message(status="OK", message=f"Accessed '{vault["entries"][index]["name"]}' entry.\nAPI Key copied to clipboard.")
 
 '''
-Delete entry
+Deletes entry given its name.
+
+Args:
+    name (str): Name of the entry to delete.
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
 def delete_entry(name:str, key:str=None, vault:dict=None):
     if not key:
@@ -275,7 +314,15 @@ def delete_entry(name:str, key:str=None, vault:dict=None):
     return gen_message(status="OK", message=f"Deleted '{name}' entry.")
 
 '''
-Delete entry at the index
+Deletes entry found at the given index. 
+
+Args:
+    index (int): Index of the entry to delete.
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
 def delete_entry_index(index: int, key:str=None, vault:dict=None):
     if not key:
@@ -285,7 +332,7 @@ def delete_entry_index(index: int, key:str=None, vault:dict=None):
     
     index = int(index)
 
-    if index >= len(vault["entries"]):
+    if abs(index) >= len(vault["entries"]):
         return gen_message("ERROR", "Invalid index for vault entry.")
 
     entry_name = vault["entries"][index]["name"]

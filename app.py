@@ -1,5 +1,5 @@
 from flask import Flask, request, jsonify, render_template
-from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
+from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry, get_encrypted_vault, save_encrypted_vault
 
 #from backend.commands_api import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
 
@@ -14,6 +14,21 @@ app = Flask(__name__)
 def check():
     print("HELLO!")
     return render_template("index.html")
+
+@app.route("/vault", methods=["GET"])
+def getVault():
+    vault_data, msg = get_encrypted_vault()
+    return jsonify({
+        "vault": vault_data,
+        "message": msg
+    })
+@app.route("/vault", methods=["POST"])
+def saveVault():
+    data = request.get_json()
+    save_encrypted_vault(vault_dict=data)
+    return jsonify({
+        "status": "OK"
+    })
 
 @app.route("/unlock", methods=["POST"])
 def unlock():
