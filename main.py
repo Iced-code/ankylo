@@ -3,24 +3,28 @@ from datetime import datetime
 from pathlib import Path
 from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index
 
-
 def main():
     parser = argparse.ArgumentParser(description="ankylo - Secure API Key Vault")
-    subparsers = parser.add_subparsers(dest="command")
+    subparsers = parser.add_subparsers(dest="command", help="Use the following commands to interface with your keys.")
 
     subparsers.add_parser("init", help="Create vault")
     subparsers.add_parser("list", help="List all entries in vualt")
 
-    add_parser = subparsers.add_parser("add", help="Add an entry")
-    add_parser.add_argument("-n", "--name", type=str, required=True, help='Name of entry to add')
-
     common_parser = argparse.ArgumentParser(add_help=False)
     group = common_parser.add_mutually_exclusive_group()
+    group.add_argument("-n", "--name", type=str, help='Name of entry to add')
+    group.add_argument("-f", "--file", type=str, help='File path of keys to add')
+    
+    add_parser = subparsers.add_parser("add", parents=[common_parser], help="Add an entry")
+    #add_parser.add_argument("-n", "--name", type=str, required=True, help='Name of entry to add')
+
+    common_parser2 = argparse.ArgumentParser(add_help=False)
+    group = common_parser2.add_mutually_exclusive_group()
     group.add_argument("-n", "--name", type=str, help='Name of entry to delete')
     group.add_argument("-i", "--index", type=str, help='Index of entry to delete')
 
-    del_parser = subparsers.add_parser("delete", parents=[common_parser], help="Delete an entry")
-    get_parser = subparsers.add_parser("get", parents=[common_parser], help="Get an entry")
+    del_parser = subparsers.add_parser("delete", parents=[common_parser2], help="Delete an entry")
+    get_parser = subparsers.add_parser("get", parents=[common_parser2], help="Get an entry")
 
     args = parser.parse_args()
 
@@ -29,6 +33,7 @@ def main():
     logs_path.parent.mkdir(parents=True, exist_ok=True)
 
     output = ""
+    result = {"message": "Error encountered while running"}
 
     if args.command == "init":
         result = create_vault()
@@ -42,15 +47,15 @@ def main():
     elif args.command == "get":
         if args.name:
             result = get_entry(args.name)
-        else:
+        elif args.index:
             result = get_entry_index(args.index)
         output = result["message"]
     elif args.command == "delete":
         if args.name:
             result = delete_entry(args.name)
-        else:
+        elif args.index:
             result = delete_entry_index(args.index)
-        output = f'Deleted "{args.name}" from vault.'
+        output = result["message"]
     else:
         parser.print_help()
 

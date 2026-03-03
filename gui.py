@@ -44,7 +44,7 @@ def login():
     if not ok or not password:
         return
     
-    key, vault = unlock_vault(password=password)
+    key, vault, message = unlock_vault(password=password)
     SESSION["key"] = key
     SESSION["vault"] = vault
 

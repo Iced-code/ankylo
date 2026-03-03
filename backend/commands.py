@@ -5,27 +5,35 @@ import time
 import pyperclip
 import uuid
 
-
 from .crypto import derive_key, encrypt_data, decrypt_data
 from .storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
 
 
 '''
-MESSAGE PROTOCOL
+Called other functions to generate message protocols.
 
-{
-    "id": uuid,
-    "status": "OK",
-    "message": "Created vault, add entry, etc."
-    "result": {
-        "key": key,
-        "vault": vault,
-        ...
-    }
-}
+Args:
+    status (int | str): Status message (or code) depending on success of function.
+    message (str): Output message based on function results.
+    result (dict= None):
+    action (str= None):
+    log_action (bool= True): log the message of this action.
+
+Returns:
+    Message protocol formatted as dict. MESSAGE PROTOCOL format:
+        {
+            "id": uuid,
+            "status": "OK",
+            "message": "Created vault, add entry, etc."
+            "result": {
+                "key": key,
+                "vault": vault,
+                ...
+            }
+        }
 '''
-def gen_message(status: int | str, message: str, result: dict=None, action: str=None, log_action: bool=True):
-    if status is int:
+def gen_message(status:int|str, message:str, result:dict=None, action:str=None, log_action:bool=True) -> dict:
+    if status is int: # if decide to use status code 200
         status = "OK"
     
     return {
@@ -38,7 +46,7 @@ def gen_message(status: int | str, message: str, result: dict=None, action: str=
         }
 
 '''
-Initialize Vault
+Initializes Vault
 '''
 def create_vault():
     if vault_exists():
@@ -80,16 +88,16 @@ def create_vault():
 '''
 Unlock and load vault
 '''
-def unlock_vault(password:str = None):
+def unlock_vault(password:str=None):
     if not vault_exists():
         print("Vault not initialized.")
-        return None, None
+        return None, None, gen_message("ERROR", "Vault not initialized.")
     
     vault_data = load_vault_file()
 
     if vault_data is None:
         print("Failed to load vault.")
-        return None, None
+        return None, None, gen_message("ERROR", "Failed to load vault.")
 
     if not password:
         password = getpass.getpass("Master password: ")
@@ -104,14 +112,14 @@ def unlock_vault(password:str = None):
         decrypted_vault = decrypt_data(key=key, nonce=nonce, ciphertext=ciphertext)
     except Exception:
         print("Incorrect password or vault corrupted")
-        return None, None
+        return None, None, gen_message("ERROR", "Incorrect password or vault corrupted.")
     
-    return key, json.loads(decrypted_vault)
+    return key, json.loads(decrypted_vault), gen_message("OK", "Unlocked vault")
 
 '''
 Save vault
 '''
-def save_vault(key, vault_dict, original_data):
+def save_vault(key:str, vault_dict:dict, original_data):
     data = json.dumps(vault_dict).encode()
     nonce, ciphertext = encrypt_data(key=key, data=data)
 
@@ -130,13 +138,13 @@ Delete vault
 def delete_vault():
     if not vault_exists():
         print("Vault not initialized.")
-        return None, None
+        return None, None, gen_message("ERROR", "Vault not initialized.")
     
     vault_data = load_vault_file()
 
     if vault_data is None:
         print("Failed to load vault.")
-        return None, None
+        return None, None, gen_message("ERROR", "Failed to load vault.")
 
     password = getpass.getpass("Master password: ")
 
@@ -150,29 +158,41 @@ def delete_vault():
         decrypted_vault = decrypt_data(key=key, nonce=nonce, ciphertext=ciphertext)
     except Exception:
         print("Incorrect password or vault corrupted")
-        return None, None
+        return None, None, gen_message("ERROR", "Incorrect password or vault corrupted.")
     
     os.remove("./vault.json")
 
     return
     
 '''
-Add entry to vault
+Add an entry to the vault.
+
+Args:
+    name (str): Name of the entry.
+    api_key (str= None): API key of the entry.
+    key (str= None): The key to the vault.
+    vault (dict= None): The vault.
+    entry_index (int= None): The index of the entry if it already exist in the vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def add_entry(name: str, api_key:str=None, key:str=None, vault=None, entry_index:int=None):
-    if not key:
-        key, vault = unlock_vault()
+def add_entry(name:str, api_key:str=None, key:str=None, vault:dict=None, entry_index:int=None):
+    if not key: # when running CLI 
+        key, vault, message = unlock_vault()
         if not key:
-            return gen_message(status="ERROR", message=f"Invalid password.")
+            return message
 
     name = name.strip()
     if name == "":
         return gen_message(status="ERROR", message=f"Invalid name.", log_action=False)
 
-    if not api_key: 
+    if not api_key: # when running CLI
         api_key = getpass.getpass("Enter API key (hidden): ")
 
-    if not entry_index:
+    # Checks if entry with same name already exists. 
+    # Asks user whether to replace entry and saves that entry's index if so.
+    if not entry_index: # when running CLI
         for index, entry in enumerate(vault["entries"]):
             if entry["name"].lower() == name.lower():
                 replace = input("Entry already exists. Replace key for this entry? (Y/N): ").upper() == "Y"
@@ -181,8 +201,8 @@ def add_entry(name: str, api_key:str=None, key:str=None, vault=None, entry_index
                 else:
                     entry_index = index
                     break
-            
-    if entry_index and entry_index != -1:
+
+    if entry_index and entry_index != -1:   # Replaces api_key index for existing entry.   
         vault["entries"][entry_index] = ({
             "name": name,
             "key": api_key
@@ -201,11 +221,11 @@ def add_entry(name: str, api_key:str=None, key:str=None, vault=None, entry_index
 '''
 List all entries
 '''
-def list_entries(key:str=None, vault=None):
+def list_entries(key:str=None, vault:dict=None):
     if not key:
-        key, vault = unlock_vault()
-        if key is None:
-            return
+        key, vault, message = unlock_vault()
+        if not key:
+            return message
     
     for entry in vault["entries"]:
         print(f"- {entry["name"]}")
@@ -216,11 +236,11 @@ def list_entries(key:str=None, vault=None):
 '''
 Get entry
 '''
-def get_entry(name:str, key:str=None, vault=None):
+def get_entry(name:str, key:str=None, vault:dict=None):
     if not key:
-        key, vault = unlock_vault()
+        key, vault, message = unlock_vault()
         if not key:
-            return
+            return message
     
     for entry in vault["entries"]:
         if entry["name"] == name:
@@ -234,16 +254,16 @@ def get_entry(name:str, key:str=None, vault=None):
 '''
 Get entry at the index
 '''
-def get_entry_index(index, key:str=None, vault=None):
+def get_entry_index(index, key:str=None, vault:dict=None):
     if not key:
-        key, vault = unlock_vault()
+        key, vault, message = unlock_vault()
         if not key:
-            return
+            return message
     
     index = int(index)
     if abs(index) >= len(vault["entries"]):
         print("Invalid index.")
-        return
+        return gen_message("ERROR", "Invalid index for vault entry.")
 
     pyperclip.copy(vault["entries"][index]["key"])
     print("API Key copied to clipboard.")
@@ -252,11 +272,11 @@ def get_entry_index(index, key:str=None, vault=None):
 '''
 Delete entry
 '''
-def delete_entry(name:str, key:str=None, vault=None):
+def delete_entry(name:str, key:str=None, vault:dict=None):
     if not key:
-        key, vault = unlock_vault()
+        key, vault, message = unlock_vault()
         if not key:
-            return
+            return message
     
     vault["entries"] = [e for e in vault["entries"] if e["name"] != name]
 
@@ -264,20 +284,21 @@ def delete_entry(name:str, key:str=None, vault=None):
     save_vault(key=key, vault_dict=vault, original_data=original_data)
     
     print("Entry deleted.")
+    return gen_message(status="OK", message=f"Deleted '{name}' entry.")
 
 '''
 Delete entry at the index
 '''
-def delete_entry_index(index, key:str=None, vault=None):
+def delete_entry_index(index, key:str=None, vault:dict=None):
     if not key:
-        key, vault = unlock_vault()
+        key, vault, message = unlock_vault()
         if not key:
-            return
+            return message
     
     index = int(index)
     if index >= len(vault["entries"]):
         print("Invalid index.")
-        return
+        return gen_message("ERROR", "Invalid index for vault entry.")
 
     print(vault["entries"][index]["name"])
     vault["entries"] = [e for e in vault["entries"] if e["name"] != vault["entries"][index]["name"]]
@@ -286,3 +307,4 @@ def delete_entry_index(index, key:str=None, vault=None):
     save_vault(key=key, vault_dict=vault, original_data=original_data)
     
     print("Entry deleted.")
+    return gen_message(status="OK", message=f"Deleted '{vault["entries"][index]["key"]}' entry.")

@@ -20,7 +20,7 @@ def unlock():
     data = request.get_json()
     password = data.get("password")
 
-    key, vault = unlock_vault(password=password)
+    key, vault, message = unlock_vault(password=password)
 
     if not key:
         print("Invalid password")
