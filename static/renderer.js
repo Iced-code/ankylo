@@ -4,12 +4,12 @@ function setTheme(){
 }
 
 function toggleDisplay(name){
-    let el = document.getElementById(name); 
-    if(el.style.display === "none"){
-        el.style.display = "block";   
+    var el = document.getElementById(name); 
+    if(window.getComputedStyle(el).display === "block"){
+        el.style.display = "none";   
     }
     else {
-        el.style.display = "none";   
+        el.style.display = "block";   
     } 
 }
 
@@ -25,7 +25,6 @@ async function loadEntries() {
         li.textContent = entry.name;
         li.value = entry.name;
 
-        // li.addEventListener('click', getEntry(entry.name));
         list.appendChild(li);
     });
 }
@@ -68,7 +67,10 @@ async function loginUser() {
 
     if(data["status"] === "OK"){
         loadEntries();
-        toggleDisplay("loginField")
+        toggleDisplay("loginField");
+        toggleDisplay("displayAddWindow");
+
+        await fetch("http://127.0.0.1:5000/vault");
     }
     else {
         document.getElementById("msg").innerText = "Invalid Password";

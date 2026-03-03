@@ -2,7 +2,7 @@ import sys
 from PySide6.QtWidgets import QApplication, QWidget, QListWidget, QVBoxLayout, QHBoxLayout, QInputDialog, QPushButton, QLabel, QFrame, QMessageBox, QLineEdit
 from PySide6.QtCore import Qt
 
-from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
+from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index, gen_message
 # import backend.commands_api # import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
 
 from backend.storage import load_vault_file, vault_exists, b64d

@@ -91,7 +91,7 @@ def unlock_vault(password:str=None):
     if not vault_data:
         return None, None, gen_message("ERROR", "Failed to load vault.")
 
-    if not password:
+    if password is None:
         password = getpass.getpass("Master password: ")
 
     salt = b64d(vault_data["kdf"]["salt"])

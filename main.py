@@ -78,6 +78,10 @@ def delete_vault_entry(name:str=None, index:int=None):
         
     output_message(result)
 
+@app.command("help")
+def program_help():
+    detail(f'help')
+
 def parsing():
     parser = argparse.ArgumentParser(description="ankylo - Secure API Key Vault")
     subparsers = parser.add_subparsers(dest="command", help="Use the following commands to interface with your keys.")

@@ -21,6 +21,9 @@ body.light {
     transition-duration: 0.3s;
 }
 
+#displayAddWindow {
+    display: none;
+}
 #addWindow {
     display: none;
 }

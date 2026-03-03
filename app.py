@@ -1,6 +1,6 @@
 from flask import Flask, request, jsonify, render_template
 from backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry, get_encrypted_vault, save_encrypted_vault
-
+from backend.storage import b64e, b64d
 #from backend.commands_api import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, delete_entry
 
 SESSION = {
@@ -12,12 +12,13 @@ app = Flask(__name__)
 
 @app.route("/")
 def check():
-    print("HELLO!")
     return render_template("index.html")
 
 @app.route("/vault", methods=["GET"])
 def getVault():
     vault_data, msg = get_encrypted_vault()
+    """ SESSION["vault"] = vault_data
+    print(SESSION["vault"]) """
     return jsonify({
         "vault": vault_data,
         "message": msg
@@ -33,14 +34,14 @@ def saveVault():
 @app.route("/unlock", methods=["POST"])
 def unlock():
     data = request.get_json()
-    password = data.get("password")
+    password = data.get("password") or ""
 
     key, vault, message = unlock_vault(password=password)
 
     SESSION["key"] = key
     SESSION["vault"] = vault
 
-    print(f'{SESSION["key"]}\n\n{SESSION["vault"]}')
+    # print(f'{SESSION["key"]}\n\n{SESSION["vault"]}')
     return(jsonify(message))
 
 @app.route("/entries", methods=["GET"])
@@ -57,7 +58,6 @@ def add():
     api_key = data.get("api_key")
 
     add_entry(name=name, api_key=api_key, key=SESSION["key"], vault=SESSION["vault"]) 
-    print("output!!")   
     return jsonify({
         "status": "ok"
     })
