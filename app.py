@@ -22,20 +22,11 @@ def unlock():
 
     key, vault, message = unlock_vault(password=password)
 
-    if not key:
-        print("Invalid password")
-        return jsonify({
-            "ERROR": "Invalid password"
-        }), 401
-
     SESSION["key"] = key
     SESSION["vault"] = vault
 
-    print(f'{SESSION["key"]}')
-
-    return jsonify({
-            "status": "OK"
-        }), 200
+    print(f'{SESSION["key"]}\n\n{SESSION["vault"]}')
+    return(jsonify(message))
 
 @app.route("/entries", methods=["GET"])
 def listEntries():

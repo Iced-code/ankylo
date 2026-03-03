@@ -2,18 +2,29 @@
 <html>
     <head>
         <title>Ankylo</title>
+        <link rel="stylesheet" href="{{url_for('static', filename='../static/styles.css') }}">
     </head>
     <body>
         <h1>Ankylo</h1>
 
-        <input type="password" id="login" placeholder="Enter password">
-        <button onclick="loginUser()">Login</button>
+        <div id="loginField">
+            <input type="password" id="login" placeholder="Enter password">
+            <button onclick="loginUser()">Login</button>
 
-        <input id="name" placeholder="Entry name">
-        <input id="apiKey" placeholder="API key">
-        <button onclick="addEntry()">Add</button>
+            <p id="msg"></p>
+        </div>
+
+        <button onclick="toggleDisplay('addWindow')">+</button>
+
+        <div id="addWindow">
+            <input id="name" placeholder="Entry name">
+            <input id="apiKey" placeholder="API key" type="password">
+            <button onclick="addEntry()">Add</button>
+        </div>
 
         <ul id="list"></ul>
+
+        <button onclick="setTheme()">theme</button>
 
         <script src="{{url_for('static', filename='../static/renderer.js') }}"></script>
     </body>
