@@ -29,7 +29,7 @@ def log_outputs(logsFilePath: Path, message: str):
 
     with open(logsFilePath, "a") as logFile:
         now = datetime.now()
-        logFile.write(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}]:{message.replace('\n', ' ').strip()}\n")
+        logFile.write(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}]: {message.replace('\n', ' ').strip()}\n")
 
 def output_message(message_protocol: dict):
     status:str = message_protocol["status"]
@@ -58,7 +58,7 @@ def main(
         detail(msg="\nankylo - Secure API Key Vault")
         typer.echo(ctx.get_help())
         info(msg="Examples:")
-        typer.echo("""  ankylo init\n  ankylo add github\n  ankylo get -n github --show""")
+        typer.echo("""  ankylo init\n  ankylo add -n github\n  ankylo get -n github --show""")
         raise typer.Exit()
 
 @app.command("init", help="Create the vault.")
@@ -103,7 +103,7 @@ def get_vault_entry(
     if result["result"]:
         print("")
         for name, api_key in result["result"].items():
-            detail(f'[{name}] - {api_key}')
+            detail(f'- {name}: {api_key}')
     output_message(result)
 
 @app.command("delete", help="Delete an entry from the vault.")

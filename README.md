@@ -20,7 +20,11 @@ pip install .
 ```
 
 ## Usage
-
+```
+ankylo init
+ankylo add -n github
+ankylo get -n github --show
+```
 
 ## Credits
 Created by Ayaan Modak
