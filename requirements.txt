@@ -2,8 +2,4 @@ argon2-cffi
 cryptography
 pyperclip
 typing
-
-Pillow
-PySide6
-
-Flask
+typer

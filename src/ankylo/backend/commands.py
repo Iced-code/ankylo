@@ -1,12 +1,11 @@
 import os
 import json
 import getpass
-import time
 import pyperclip
 import uuid
 
-from .crypto import derive_key, encrypt_data, decrypt_data
-from .storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
+from ankylo.backend.crypto import derive_key, encrypt_data, decrypt_data
+from ankylo.backend.storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
 
 
 '''
@@ -203,7 +202,7 @@ def add_entry(name:str, api_key:str=None, key:str=None, vault:dict=None, entry_i
                     entry_index = index
                     break
 
-    if entry_index and entry_index != -1:   # Replaces api_key index for existing entry.   
+    if (entry_index is not None) and entry_index != -1:   # Replaces api_key index for existing entry.   
         vault["entries"][entry_index] = ({
             "name": name,
             "key": api_key
@@ -229,16 +228,18 @@ Args:
 Returns:
     The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def list_entries(key:str=None, vault:dict=None):
+def list_entries(key:str=None, vault:dict=None, show:bool=False):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
             return message
     
     output = dict()
-    print("")
     for index, entry in enumerate(vault["entries"]):
         output[index] = entry["name"]
+
+        if show:
+            output[index] = (entry["name"], entry["key"])
     
     return gen_message(status="OK", message=f"Listed all vault entries.", result=output)
 
@@ -253,7 +254,7 @@ Args:
 Returns:
     The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def get_entry(name:str, key:str=None, vault:dict=None):
+def get_entry(name:str, key:str=None, vault:dict=None, show:bool=False):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
@@ -262,7 +263,10 @@ def get_entry(name:str, key:str=None, vault:dict=None):
     for entry in vault["entries"]:
         if entry["name"] == name:
             pyperclip.copy(entry["key"])
-            return gen_message(status="OK", message=f"Accessed {name} entry.\nAPI Key copied to clipboard.")
+            output = gen_message(status="OK", message=f"Accessed '{name}' entry.\nAPI Key copied to clipboard.")
+            if show:
+                output["result"] = {entry["name"]: entry["key"]}
+            return output
 
     return gen_message(status="ERROR", message=f"Entry '{name}' not found.", log_action=True)
 
@@ -277,7 +281,7 @@ Args:
 Returns:
     The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def get_entry_index(index: int, key:str=None, vault:dict=None):
+def get_entry_index(index: int, key:str=None, vault:dict=None, show:bool=False):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
@@ -287,7 +291,10 @@ def get_entry_index(index: int, key:str=None, vault:dict=None):
         return gen_message("ERROR", "Invalid index for vault entry.")
 
     pyperclip.copy(vault["entries"][index]["key"])
-    return gen_message(status="OK", message=f"Accessed '{vault["entries"][index]["name"]}' entry.\nAPI Key copied to clipboard.")
+    output = gen_message(status="OK", message=f"Accessed '{vault["entries"][index]["name"]}' entry.\nAPI Key copied to clipboard.")
+    if show:
+            output["result"] = {vault["entries"][index]["name"]: vault["entries"][index]["key"]}
+    return output
 
 '''
 Deletes entry given its name.
@@ -306,7 +313,11 @@ def delete_entry(name:str, key:str=None, vault:dict=None):
         if not key:
             return message
     
-    vault["entries"] = [e for e in vault["entries"] if e["name"] != name]
+    confirm = input("Delete this entry and its key? This cannot be undone. (Y/N): ").upper() == "Y"
+    if confirm:
+        vault["entries"] = [e for e in vault["entries"] if e["name"] != name]
+    else:
+        return gen_message(status="", message=f"Entry was not deleted.", log_action=False)
 
     original_data = load_vault_file()
     save_vault(key=key, vault_dict=vault, original_data=original_data)
@@ -335,8 +346,12 @@ def delete_entry_index(index: int, key:str=None, vault:dict=None):
     if abs(index) >= len(vault["entries"]):
         return gen_message("ERROR", "Invalid index for vault entry.")
 
-    entry_name = vault["entries"][index]["name"]
-    vault["entries"] = [e for e in vault["entries"] if e["name"] != entry_name]
+    confirm = input("Delete this entry and its key? This cannot be undone. (Y/N): ").upper() == "Y"
+    if confirm:
+        entry_name = vault["entries"][index]["name"]
+        vault["entries"] = [e for e in vault["entries"] if e["name"] != entry_name]
+    else:
+        return gen_message(status="", message=f"Entry was not deleted.", log_action=False)
 
     original_data = load_vault_file()
     save_vault(key=key, vault_dict=vault, original_data=original_data)

@@ -1,0 +1,27 @@
+[project]
+name = "ankylo"
+version = "1.0"
+description = "Secure API key vault CLI"
+authors = [{ name = "Ayaan Modak (Iced-Code)" }]
+readme = "README.md"
+requires-python = ">=3.8"
+
+dependencies = [
+    "argon2-cffi>=23.1.0",
+    "cryptography>=42.0.0",
+    "pyperclip>=1.8.2",
+    "typer>=0.12.0"
+]
+
+[project.scripts]
+ankylo = "ankylo.main:main"
+
+[build-system]
+requires = ["setuptools"]
+build-backend = "setuptools.build_meta"
+
+[tool.setuptools]
+package-dir = {"" = "src"}
+
+[tool.setuptools.packages.find]
+where = ["src"]
