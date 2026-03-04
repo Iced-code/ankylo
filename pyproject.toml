@@ -2,7 +2,7 @@
 name = "ankylo"
 version = "1.0"
 description = "Secure API key vault CLI"
-authors = [{ name = "Ayaan Modak (Iced-Code)" }]
+authors = [{ name = "Ayaan Modak (Iced-code)" }]
 readme = "README.md"
 requires-python = ">=3.8"
 
