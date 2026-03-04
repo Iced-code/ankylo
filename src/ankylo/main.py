@@ -58,7 +58,7 @@ def main(
         detail(msg="\nankylo - Secure API Key Vault")
         typer.echo(ctx.get_help())
         info(msg="Examples:")
-        typer.echo("""  main.py init\n  main.py add github\n  main.py get -n github --show""")
+        typer.echo("""  ankylo init\n  ankylo add github\n  ankylo get -n github --show""")
         raise typer.Exit()
 
 @app.command("init", help="Create the vault.")

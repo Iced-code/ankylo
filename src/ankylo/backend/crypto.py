@@ -6,7 +6,14 @@ from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 aad = b"ankylo-v1.0"
 
 '''
-Key derivation using Argon2id
+Key derivation using Argon2id.
+
+Args:
+    password (str): User's master password.
+    salt (bytes): Salt for password hashing.
+
+Returns:
+    Key to the vault as a string of bytes.
 '''
 def derive_key(password: str, salt: bytes) -> bytes:
     return hash_secret_raw(
@@ -20,7 +27,14 @@ def derive_key(password: str, salt: bytes) -> bytes:
     )
 
 '''
-Encrypt vault using AES-256-GCM
+Encrypts vault using AES-256-GCM
+
+Args:
+    key (bytes): Key to the vault.
+    data (bytes): Data to be encrypted.
+
+Returns:
+    Nonce and ciphertext of user's encrypted keys.
 '''
 def encrypt_data(key: bytes, data: bytes):
     aesgcm = AESGCM(key)
@@ -31,6 +45,14 @@ def encrypt_data(key: bytes, data: bytes):
 
 '''
 Decrypt vault
+
+Args:
+    key (bytes): Key to the vault.
+    nonce (bytes): Random data necessary for decryption.
+    ciphertext (bytes): Data to be decrypted.
+
+Returns:
+    Decrypted plaintext of user's keys.
 '''
 def decrypt_data(key: bytes, nonce: bytes, ciphertext: bytes):
     aesgcm = AESGCM(key)

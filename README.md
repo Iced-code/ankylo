@@ -5,7 +5,7 @@
 Secure vault
 
 
-## Install
+## Installation
 
 ### Option 1: Install from GitHub
 ```
@@ -18,3 +18,9 @@ git clone https://github.com/Iced-code/ankylo.git
 cd ankylo
 pip install .
 ```
+
+## Usage
+
+
+## Credits
+Created by Ayaan Modak

@@ -1,31 +1,47 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
     <head>
-        <title>Ankylo</title>
-        <link rel="stylesheet" href="{{url_for('static', filename='../static/styles.css') }}">
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Ankylo | Python Tool</title>
+        <link rel="stylesheet" href="static/styles.css">
     </head>
     <body>
-        <h1>Ankylo</h1>
+        <header>
+            <nav class="navbar">
+                <div class="logo">
+                    <img src="./static/logo.png" alt="Ankylo Logo">
+                </div>
+                <ul class="nav-links">
+                    <li><a href="#">Home</a></li>
+                    <li><a href="#">About</a></li>
+                    <li><a href="#install">Install</a></li>
+                    <li class="theme-toggle" onclick="setTheme()">Toggle Theme</li>
+                </ul>
+            </nav>
+        </header>
 
-        <div id="loginField">
-            <input type="password" id="login" placeholder="Enter password">
-            <button onclick="loginUser()">Login</button>
+        <main class="content">
+            <section class="hero">
+                <img src="./static/logo.png" alt="Ankylo Logo">
+                <p>A powerful tool for streamlined development. Built for speed, designed for stability.</p>
+            </section>
+        
+            <section class="installation" id="install">
+                <h2>Option 1: Quick Install</h2>
+                <pre><code>pip install git+https://github.com/Iced-code/ankylo.git</code></pre>
 
-            <p id="msg"></p>
-        </div>
+                <h2>Option 2: Build from Source</h2>
+                <pre><code>git clone https://github.com/Iced-code/ankylo.git
+cd ankylo
+pip install .</code></pre>
+            </section>
+        </main>
 
-        <button onclick="toggleDisplay('addWindow')" id="displayAddWindow">+</button>
+        <footer>
+            <p>&copy; 2026 Ankylo Project. Licensed under MIT.</p>
+        </footer>
 
-        <div id="addWindow">
-            <input id="name" placeholder="Entry name">
-            <input id="apiKey" placeholder="API key" type="password">
-            <button onclick="addEntry()">Add</button>
-        </div>
-
-        <ul id="list"></ul>
-
-        <button onclick="setTheme()">theme</button>
-
-        <script src="{{url_for('static', filename='../static/renderer.js') }}"></script>
+        <script src="./static/scripts.js"></script>
     </body>
 </html>
