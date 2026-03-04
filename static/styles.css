@@ -130,5 +130,8 @@ footer {
 
 @media (max-width: 768px) {
     .hero h1 { font-size: 2rem; }
-    .nav-links { display: none; } /* Consider adding a burger menu later */
+    .hero img {width: 200px; aspect-ratio: 100%;}
+    main {
+        align-items: center;
+    }
 }
