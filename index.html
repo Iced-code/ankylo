@@ -168,8 +168,15 @@
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo list</div>
-      <div class="cmd-args">[--show] &nbsp;[-out &lt;file&gt;]</div>
-      <div class="cmd-desc">List all vault entries with their indices. Add <code>--show</code> to reveal key values. Use <code>-out</code> to export entries to a <code>NAME=KEY</code> file.</div>
+      <div class="cmd-args">[--show]</div>
+      <div class="cmd-desc">List all vault entries with their indices. Add <code>--show</code> to reveal key values.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo export</div>
+      <div class="cmd-args">-out &lt;file&gt; &nbsp;[-n &lt;name&gt;] &nbsp;[-i &lt;index&gt;] &nbsp;[.]</div>
+      <div class="cmd-desc">
+        Export entries to a <code>NAME=KEY</code> formatted file. Select by name, index, or pass <code>.</code> to export all. Flags <code>-n</code> and <code>-i</code> accept multiple values but cannot be combined.
+      </div>
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo env</div>
@@ -268,6 +275,13 @@
       <div class="qs-content">
         <div class="qs-cmd">ankylo list</div>
         <div class="qs-note">See all stored entries and their timestamps</div>
+      </div>
+    </div>
+    <div class="qs-step">
+      <span class="qs-num">06</span>
+      <div class="qs-content">
+        <div class="qs-cmd">ankylo export -out .env .</div>
+        <div class="qs-note">Export all stored entries to file ".env"</div>
       </div>
     </div>
   </div>

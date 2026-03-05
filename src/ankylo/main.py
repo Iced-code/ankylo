@@ -1,9 +1,9 @@
 from datetime import datetime
 from pathlib import Path
-from ankylo.backend.commands import create_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index, gen_message, add_entries_from_file, delete_vault, export_entry
+from ankylo.backend.commands import create_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index, gen_message, add_entries_from_file, delete_vault, export_entry, export_entries_file
 from ankylo.backend.storage import BASE_DIR
 import typer
-from typing import Optional
+from typing import Optional, List
 
 # Developed by Ayaan Modak (GitHub: Iced-Code)
 
@@ -86,9 +86,8 @@ def add_entry_to_vault(
 @app.command("list", help="List all entries in the vault.")
 def list_vault_entries(
     show: bool = typer.Option(False, "--show", help="Display all entries' secret key."),
-    outputFile: str = typer.Option(None, "-out", help="File to write entries and their keys to.")
 ):
-    result = list_entries(show=show, outputFile=outputFile)
+    result = list_entries(show=show)
     
     if result["result"]:
         print("")
@@ -118,6 +117,28 @@ def get_vault_entry(
 
     output_message(result)
 
+@app.command("export", help="Export entries to a file.")
+def export_vault_entries(
+    outputFile: str = typer.Option(None, "-out", help="File to write entries and their keys to."),
+    names: Optional[List[str]] = typer.Option(None, "--name", "-n", help='Names of entries to export.'),
+    indices: Optional[List[int]] = typer.Option(None, "--index", "-i", help='Indices of entries to export.'),
+    all_entries: Optional[str] = typer.Argument(None, help='Use "." to export all entries.'),
+):
+    if not outputFile:
+        result = gen_message(status="ERROR", message="Must provide -out", log_action=False)        
+    elif all_entries == '.':
+        result = export_entries_file(outputFile=outputFile, names=None)
+    elif names and indices:
+        result = gen_message(status="ERROR", message="Must provide --name or --index, not both", log_action=False)
+    elif names:
+        result = export_entries_file(outputFile=outputFile, names=names)
+    elif indices:
+        result = export_entries_file(outputFile=outputFile, indices=indices)
+    else:
+        result = gen_message(status="ERROR", message="Must provide --name or '.'", log_action=False)
+
+    output_message(result)
+
 @app.command("delete", help="Delete an entry from the vault.")
 def delete_vault_entry(
     name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to delete.'),
@@ -144,7 +165,7 @@ def delete_entire_vault():
     result = delete_vault()
     output_message(result)
 
-@app.command("env", help="Export an entrry as an environment variable.")
+@app.command("env", help="Export an entry as an environment variable.")
 def export_entry_env(
     name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to export.'),
     shell: Optional[str] = typer.Option("bash", "--shell", "-s", help='Shell format: bash, powershell, cmd')

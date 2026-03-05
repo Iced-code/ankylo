@@ -245,34 +245,71 @@ Args:
     key (str= None): Key to the vault.
     vault (dict= None): The vault.
     show (bool= False): Show the keys of all entries in the vault.
-    outputFile (str= None): File to write entries and keys to.
 
 Returns:
     The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def list_entries(key:str=None, vault:dict=None, show:bool=False, outputFile:str=None):
+def list_entries(key:str=None, vault:dict=None, show:bool=False):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
             return message
     
     output = dict()
-    file_content = ""
     for index, entry in enumerate(vault["entries"]):
         output[index] = entry["name"]
 
         if show:
             output[index] = (entry["name"], entry["key"])
 
-        if outputFile:
-            file_content += f"{entry["name"].strip().replace(" ", "_")}={entry["key"]}\n"
-
-    if outputFile:
-        with open(outputFile, "w") as file:
-            file.write(file_content)
-        return gen_message(status="OK", message=f"Listed all vault entries.\nEntries successfully written to file '{outputFile}'.", result=output)
-
     return gen_message(status="OK", message=f"Listed all vault entries.", result=output)
+
+'''
+Export entries to the specified file.
+
+Args:
+    outputFile (str): File to export entries to.
+    names (list[str]= None): Names of entries to export.
+    indices (list[int]= None): Indices of entries to export.
+    key (str= None): Key to the vault.
+    vault (dict= None): The vault.
+    
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
+'''
+def export_entries_file(outputFile:str, names:list[str]=None, indices:list[int]=None, key:str=None, vault:dict=None):
+    if not key:
+        key, vault, message = unlock_vault()
+        if not key:
+            return message
+
+    if len(vault) == 0:
+        return gen_message(status="", message=f"Vault is empty.\nExport cancelled.")
+
+    if names:
+        filtered_vault =  [entry for entry in vault["entries"] if entry["name"] in names]
+    elif indices:
+        filtered_vault = []
+        for i in indices:
+            if abs(i) >= len(vault["entries"]):
+                return gen_message(status="ERROR", message=f"Invalid index '{i}'\nExport cancelled.")
+
+            filtered_vault.append({"name": vault["entries"][i]["name"], "key": vault["entries"][i]["key"]})
+    else:
+        filtered_vault = [entry for entry in vault["entries"]]
+
+    if len(filtered_vault) == 0:
+        return gen_message(status="ERROR", message=f"Entry names do not exist.\nExport cancelled.")
+
+
+    if outputFile and filtered_vault:
+        with open(outputFile, "w") as file:
+            for e in filtered_vault:
+                file.write(f'\n{e["name"]}={e["key"]}')
+        return gen_message(status="OK", message=f"Entries successfully exported to file '{outputFile}'.")
+
+    return gen_message(status="ERROR", message=f"Unable to export entries to this file.")
+
 
 '''
 Gets entry given its name. Entry's key is copied to the user's clipboard.
