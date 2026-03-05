@@ -2,8 +2,10 @@ import os
 import json
 import base64
 import tempfile
+from pathlib import Path
 
-VAULT_FILE = os.path.join( os.path.dirname(os.path.abspath(__file__)), "vault.json" )  # "vault.json"
+BASE_DIR = Path.home() / "ankylo"
+VAULT_FILE = BASE_DIR / "vault.json"
 
 '''
 Checks if vault exists.

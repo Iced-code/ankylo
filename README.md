@@ -1,9 +1,10 @@
-<img src="./assets/background.png" alt="Screenshot of the project">
+<img src="./static/background.png" alt="ankylo logo">
 
 # ankylo
 
-Your secrets, together and secure.
-Secure vault
+### Your secrets, together and secure.
+
+ankylo is an encrypted, local-first key vault that lives entirely in your terminal. Store, retrieve, manage, and inject API keys without ever touching a browser or plaintext file.
 
 
 ## Installation
