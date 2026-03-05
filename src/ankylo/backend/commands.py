@@ -107,19 +107,6 @@ def unlock_vault(password:str=None):
     
     return key, json.loads(decrypted_vault), gen_message("OK", "Unlocked vault.")
 
-def get_encrypted_vault():
-    if not vault_exists():
-        return None, gen_message("ERROR", "Vault not initialized.")
-    
-    vault_data = load_vault_file()
-
-    if not vault_data:
-        return None, gen_message("ERROR", "Failed to load vault.")
-    
-    return vault_data, gen_message("OK", "Loaded encrypted vault.")
-def save_encrypted_vault(vault_dict:dict):
-    write_atomically(vault_dict)
-
 '''
 Save updates and changes to the vault.
 '''
@@ -256,23 +243,34 @@ Lists all entries in the vault.
 Args:
     key (str= None): Key to the vault.
     vault (dict= None): The vault.
+    show (bool= False): Show the keys of all entries in the vault.
+    outputFile (str= None): File to write entries and keys to.
 
 Returns:
     The formatted message protocol from the parameters passed into gen_message(...).
 '''
-def list_entries(key:str=None, vault:dict=None, show:bool=False):
+def list_entries(key:str=None, vault:dict=None, show:bool=False, outputFile:str=None):
     if not key:
         key, vault, message = unlock_vault()
         if not key:
             return message
     
     output = dict()
+    file_content = ""
     for index, entry in enumerate(vault["entries"]):
         output[index] = entry["name"]
 
         if show:
             output[index] = (entry["name"], entry["key"])
-    
+
+        if outputFile:
+            file_content += f"{entry["name"].strip().replace(" ", "_")}={entry["key"]}\n"
+
+    if outputFile:
+        with open(outputFile, "w") as file:
+            file.write(file_content)
+        return gen_message(status="OK", message=f"Listed all vault entries.\nEntries successfully written to file '{outputFile}'", result=output)
+
     return gen_message(status="OK", message=f"Listed all vault entries.", result=output)
 
 '''

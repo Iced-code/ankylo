@@ -1,85 +1,792 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8">
-        <meta name="viewport" content="width=device-width, initial-scale=1.0">
-        <title>ankylo | Python Tool</title>
-        <link rel="stylesheet" href="static/styles.css">
-    </head>
-    <body>
-        <header>
-            <nav class="navbar">
-                <div class="logo">
-                    <a href="#"><img src="./static/logo.png" alt="Ankylo Logo"></a>
-                </div>
-                <ul class="nav-links">
-                    <li><a href="#">Home</a></li>
-                    <li><a href="#features">Features</a></li>
-                    <li><a href="#install">Install</a></li>
-                </ul>
-            </nav>
-        </header>
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>ankylo — secure key vault for your CLI</title>
+  <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@300;400;500;600;700&family=Bebas+Neue&family=IBM+Plex+Sans:wght@300;400;500&display=swap" rel="stylesheet"/>
+  <style>
+    *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
-        <main class="content">
-            <section class="hero">
-                <h1><span class="bold">a</span>nkyl<span class="bold">o</span></h1>
-                <p class="subtitle">Your keys, together and secure.</p>
-                <div class="hero-cta">
-                    <a href="#install" class="btn">Get Started</a>
-                </div>
-            </section>
+    :root {
+      --bg: #0a0a0a;
+      --surface: #111111;
+      --border: #1e1e1e;
+      --green: #00e676;
+      --green-dim: #00e67622;
+      --green-mid: #00e67644;
+      --text: #e8e8e8;
+      --muted: #555;
+      --muted2: #333;
+    }
 
-            <section id="features" class="features-grid">
-                <div class="card">
-                    <h3>Strong Cryptography</h3>
-                    <p>Argon2id for key derivation and AES-256-GCM for authenticated encryption.</p>
-                </div>
-                <div class="card">
-                    <h3>Security-First</h3>
-                    <p>Zero-knowledge style vault. Atomic file writes to prevent corruption.</p>
-                </div>
-                <div class="card">
-                    <h3>Developer CLI</h3>
-                    <p>Built with Typer for a clean, intuitive command-line experience.</p>
-                </div>
-                <div class="card">
-                    <h3>Fully Local</h3>
-                    <p>Lightweight, no external dependencies, and clipboard integration.</p>
-                </div>
-            </section>
+    html { scroll-behavior: smooth; }
 
-            <section class="code-section" id="install">
-                <div class="code-header">
-                    <h2>Installation</h2>
-                </div>
-                <div class="code-snippet">
-                    <p>Quick Install</p>
-                    <pre><code>pip install git+https://github.com/Iced-code/ankylo.git</code></pre>
-                </div>
-                <div class="code-snippet">
-                    <p>Build from Source</p>
-                    <pre><code>git clone https://github.com/Iced-code/ankylo.git
-        cd ankylo
-        pip install .</code></pre>
-                </div>
-            </section>
+    body {
+      background: var(--bg);
+      color: var(--text);
+      font-family: 'IBM Plex Mono', monospace;
+      min-height: 100vh;
+      overflow-x: hidden;
+    }
 
-            <section class="code-section" id="usage">
-                <div class="code-header">
-                    <h2>Usage</h2>
-                </div>
-                <div class="code-snippet">
-                    <pre><code>ankylo init
-        ankylo add -n github
-        ankylo get -n github --show</code></pre>
-                </div>
-            </section>
-        </main>
+    /* Scanline overlay */
+    body::before {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background: repeating-linear-gradient(
+        0deg,
+        transparent,
+        transparent 2px,
+        rgba(0,0,0,0.07) 2px,
+        rgba(0,0,0,0.07) 4px
+      );
+      pointer-events: none;
+      z-index: 100;
+    }
 
-        <footer>
-            <p>&copy; 2026 Ankylo Project.</p>
-        </footer>
+    /* Noise texture */
+    body::after {
+      content: '';
+      position: fixed;
+      inset: 0;
+      background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E");
+      pointer-events: none;
+      z-index: 99;
+    }
 
-        <script src="./static/scripts.js"></script>
-    </body>
+    /* ─── HEADER ─── */
+    header {
+      border-bottom: 1px solid var(--border);
+      padding: 2rem 3rem;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      position: sticky;
+      top: 0;
+      background: rgba(10,10,10,0.92);
+      backdrop-filter: blur(8px);
+      z-index: 50;
+    }
+
+    .logo {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: 2rem;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      text-shadow: 0 0 20px var(--green), 0 0 60px rgba(0,230,118,0.3);
+    }
+
+    .logo span {
+      color: var(--muted);
+      font-size: 0.8rem;
+      letter-spacing: 0.1em;
+      display: block;
+      font-family: 'IBM Plex Mono', monospace;
+      font-weight: 300;
+      margin-top: -4px;
+    }
+
+    nav a {
+      color: var(--muted);
+      text-decoration: none;
+      font-size: 0.7rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      margin-left: 2rem;
+      transition: color 0.2s;
+    }
+    nav a:hover { color: var(--green); }
+
+    /* ─── HERO ─── */
+    .hero {
+      padding: 7rem 3rem 5rem;
+      max-width: 900px;
+      position: relative;
+    }
+
+    .hero-badge {
+      display: inline-block;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--green);
+      border: 1px solid var(--green-mid);
+      padding: 0.3rem 0.75rem;
+      margin-bottom: 2.5rem;
+      background: var(--green-dim);
+      animation: fadeSlideIn 0.6s ease both;
+    }
+
+    .hero h1 {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(4rem, 10vw, 8rem);
+      letter-spacing: 0.05em;
+      line-height: 0.95;
+      color: var(--text);
+      animation: fadeSlideIn 0.6s 0.1s ease both;
+    }
+
+    .hero h1 .accent {
+      color: var(--green);
+      text-shadow: 0 0 30px rgba(0,230,118,0.4);
+    }
+
+    .hero-sub {
+      margin-top: 2rem;
+      font-size: 1rem;
+      color: var(--muted);
+      font-weight: 300;
+      line-height: 1.7;
+      max-width: 540px;
+      font-family: 'IBM Plex Sans', sans-serif;
+      animation: fadeSlideIn 0.6s 0.2s ease both;
+    }
+
+    .hero-cta {
+      margin-top: 3rem;
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+      animation: fadeSlideIn 0.6s 0.3s ease both;
+    }
+
+    .btn-primary {
+      background: var(--green);
+      color: #000;
+      border: none;
+      padding: 0.75rem 1.75rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      font-weight: 600;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: box-shadow 0.2s, transform 0.15s;
+    }
+    .btn-primary:hover {
+      box-shadow: 0 0 30px rgba(0,230,118,0.5);
+      transform: translateY(-1px);
+    }
+
+    .btn-ghost {
+      background: transparent;
+      color: var(--muted);
+      border: 1px solid var(--border);
+      padding: 0.75rem 1.75rem;
+      font-family: 'IBM Plex Mono', monospace;
+      font-size: 0.75rem;
+      letter-spacing: 0.12em;
+      text-transform: uppercase;
+      cursor: pointer;
+      text-decoration: none;
+      display: inline-block;
+      transition: border-color 0.2s, color 0.2s;
+    }
+    .btn-ghost:hover { border-color: var(--green); color: var(--green); }
+
+    /* ─── DIVIDER ─── */
+    .divider {
+      border: none;
+      border-top: 1px solid var(--border);
+      margin: 0 3rem;
+    }
+
+    /* ─── SECTION ─── */
+    section {
+      padding: 5rem 3rem;
+    }
+
+    .section-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.25em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 1rem;
+    }
+
+    .section-title {
+      font-family: 'Bebas Neue', sans-serif;
+      font-size: clamp(2.5rem, 5vw, 3.5rem);
+      letter-spacing: 0.06em;
+      color: var(--text);
+      margin-bottom: 1rem;
+    }
+
+    /* ─── DESCRIPTION ─── */
+    .description {
+      max-width: 680px;
+    }
+
+    .description p {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 1rem;
+      line-height: 1.9;
+      color: #999;
+      margin-bottom: 1.2rem;
+    }
+
+    .description p strong {
+      color: var(--text);
+      font-weight: 500;
+    }
+
+    /* ─── TECH GRID ─── */
+    .tech-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      margin-top: 3rem;
+      border: 1px solid var(--border);
+    }
+
+    .tech-card {
+      background: var(--bg);
+      padding: 2rem;
+      position: relative;
+      overflow: hidden;
+      transition: background 0.25s;
+    }
+
+    .tech-card::before {
+      content: '';
+      position: absolute;
+      top: 0; left: 0;
+      width: 2px;
+      height: 0;
+      background: var(--green);
+      transition: height 0.3s ease;
+    }
+
+    .tech-card:hover { background: #0e0e0e; }
+    .tech-card:hover::before { height: 100%; }
+
+    .tech-icon {
+      font-size: 1.4rem;
+      margin-bottom: 1rem;
+    }
+
+    .tech-name {
+      font-size: 0.65rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--green);
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-title {
+      font-size: 1rem;
+      font-weight: 600;
+      color: var(--text);
+      margin-bottom: 0.5rem;
+    }
+
+    .tech-desc {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.8rem;
+      color: var(--muted);
+      line-height: 1.6;
+    }
+
+    /* ─── COMMANDS ─── */
+    .commands-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+      gap: 1px;
+      background: var(--border);
+      border: 1px solid var(--border);
+      margin-top: 3rem;
+    }
+
+    .cmd-card {
+      background: var(--bg);
+      padding: 1.75rem;
+      transition: background 0.2s;
+    }
+    .cmd-card:hover { background: #0d0d0d; }
+
+    .cmd-name {
+      font-size: 0.9rem;
+      font-weight: 600;
+      color: var(--green);
+      margin-bottom: 0.35rem;
+    }
+
+    .cmd-args {
+      font-size: 0.7rem;
+      color: var(--muted);
+      margin-bottom: 0.75rem;
+    }
+
+    .cmd-desc {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.78rem;
+      color: #777;
+      line-height: 1.55;
+    }
+
+    /* ─── INSTALL ─── */
+    .install-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      max-width: 680px;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .install-block::before {
+      content: '// install';
+      position: absolute;
+      top: -0.55rem;
+      left: 1.5rem;
+      background: var(--surface);
+      padding: 0 0.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .install-option {
+      margin-bottom: 2rem;
+    }
+
+    .install-option:last-child { margin-bottom: 0; }
+
+    .install-label {
+      font-size: 0.6rem;
+      letter-spacing: 0.2em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 0.6rem;
+    }
+
+    .code-line {
+      display: flex;
+      align-items: center;
+      gap: 0.75rem;
+      margin-bottom: 0.3rem;
+    }
+
+    .prompt {
+      color: var(--green);
+      user-select: none;
+      font-size: 0.8rem;
+    }
+
+    .code-text {
+      font-size: 0.82rem;
+      color: var(--text);
+      letter-spacing: 0.02em;
+    }
+
+    /* ─── QUICK START ─── */
+    .quickstart-block {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      padding: 2.5rem;
+      max-width: 680px;
+      margin-top: 2rem;
+      position: relative;
+    }
+
+    .quickstart-block::before {
+      content: '// quick start';
+      position: absolute;
+      top: -0.55rem;
+      left: 1.5rem;
+      background: var(--surface);
+      padding: 0 0.5rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--muted);
+    }
+
+    .qs-step {
+      display: grid;
+      grid-template-columns: 1.5rem 1fr;
+      gap: 1rem;
+      margin-bottom: 1.4rem;
+      align-items: start;
+    }
+    .qs-step:last-child { margin-bottom: 0; }
+
+    .qs-num {
+      font-size: 0.65rem;
+      color: var(--green);
+      padding-top: 0.05rem;
+    }
+
+    .qs-content {}
+
+    .qs-cmd {
+      font-size: 0.8rem;
+      color: var(--text);
+      margin-bottom: 0.2rem;
+    }
+
+    .qs-note {
+      font-family: 'IBM Plex Sans', sans-serif;
+      font-size: 0.72rem;
+      color: var(--muted);
+    }
+
+    /* ─── FOOTER ─── */
+    footer {
+      border-top: 1px solid var(--border);
+      padding: 2.5rem 3rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      flex-wrap: wrap;
+      gap: 1rem;
+    }
+
+    .footer-left {
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.08em;
+    }
+
+    .footer-links a {
+      font-size: 0.65rem;
+      color: var(--muted);
+      text-decoration: none;
+      letter-spacing: 0.1em;
+      margin-left: 2rem;
+      transition: color 0.2s;
+    }
+    .footer-links a:hover { color: var(--green); }
+
+    /* ─── ANIMATIONS ─── */
+    @keyframes fadeSlideIn {
+      from { opacity: 0; transform: translateY(16px); }
+      to   { opacity: 1; transform: translateY(0); }
+    }
+
+    .reveal {
+      opacity: 0;
+      transform: translateY(20px);
+      transition: opacity 0.5s ease, transform 0.5s ease;
+    }
+    .reveal.visible {
+      opacity: 1;
+      transform: translateY(0);
+    }
+
+    /* ─── HERO BG GLOW ─── */
+    .glow-orb {
+      position: fixed;
+      width: 600px;
+      height: 600px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,230,118,0.04) 0%, transparent 70%);
+      top: -200px;
+      right: -100px;
+      pointer-events: none;
+      z-index: 1;
+    }
+
+    /* ─── STATUS BAR ─── */
+    .status-bar {
+      background: var(--green-dim);
+      border-bottom: 1px solid var(--green-mid);
+      padding: 0.45rem 3rem;
+      font-size: 0.6rem;
+      letter-spacing: 0.15em;
+      color: var(--green);
+      display: flex;
+      gap: 2.5rem;
+      overflow-x: auto;
+    }
+
+    .status-item::before { content: '● '; }
+  </style>
+</head>
+<body>
+
+<div class="glow-orb"></div>
+
+<div class="status-bar">
+  <span class="status-item">argon2id key derivation</span>
+  <span class="status-item">aes-256-gcm encryption</span>
+  <span class="status-item">atomic vault writes</span>
+  <span class="status-item">pip installable</span>
+  <span class="status-item">zero plaintext on disk</span>
+</div>
+
+<header>
+  <div class="logo">
+    ankylo
+    <span>secure key vault · cli</span>
+  </div>
+  <nav>
+    <a href="#about">About</a>
+    <a href="#security">Security</a>
+    <a href="#commands">Commands</a>
+    <a href="#install">Install</a>
+  </nav>
+</header>
+
+<!-- HERO -->
+<section class="hero" id="about">
+  <div class="hero-badge">v0.5 · open source · cli tool</div>
+  <h1>YOUR <span class="accent">API KEYS</span><br>LIVE HERE NOW.</h1>
+  <p class="hero-sub">
+    ankylo is a encrypted, local-first key vault that lives entirely in your terminal.
+    Store, retrieve, and manage API keys without ever touching a browser.
+  </p>
+  <div class="hero-cta">
+    <a href="#install" class="btn-primary">Get Started</a>
+    <a href="https://github.com/Iced-code/ankylo" class="btn-ghost">View on GitHub</a>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- ABOUT -->
+<section>
+  <p class="section-label">What is ankylo</p>
+  <h2 class="section-title">KEYS SECURED.<br>WORKFLOW INTACT.</h2>
+
+  <div class="description reveal">
+    <p>
+      ankylo is a <strong>command-line API key vault</strong> built for developers who want
+      their secrets stored securely without leaving the terminal. Your entire vault lives
+      in a single encrypted file on disk — no cloud sync, no accounts, no browser required.
+    </p>
+    <p>
+      Every entry is protected by a master password you choose at initialization.
+      That password never touches disk — instead, it's run through
+      <strong>Argon2id</strong> to derive an encryption key, which then encrypts your vault
+      with <strong>AES-256-GCM</strong>. Even if someone gets your vault file, they get nothing useful.
+    </p>
+    <p>
+      Need to grab a key fast? One command copies it straight to your clipboard.
+      Need to bulk-import from a dotenv file? ankylo reads it. Need to export back out?
+      ankylo writes it. Everything stays in the terminal, everything stays encrypted at rest.
+    </p>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- SECURITY -->
+<section id="security">
+  <p class="section-label">Security architecture</p>
+  <h2 class="section-title">BUILT ON<br>SERIOUS CRYPTO.</h2>
+
+  <div class="tech-grid reveal">
+    <div class="tech-card">
+      <div class="tech-icon">🔑</div>
+      <div class="tech-name">KDF</div>
+      <div class="tech-title">Argon2id</div>
+      <div class="tech-desc">
+        Memory-hard password hashing resistant to GPU and side-channel attacks.
+        time_cost=3, memory_cost=64MB, parallelism=2. Your password never hits disk.
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">🔒</div>
+      <div class="tech-name">Encryption</div>
+      <div class="tech-title">AES-256-GCM</div>
+      <div class="tech-desc">
+        Authenticated encryption with associated data. Every vault save generates
+        a fresh nonce, providing both confidentiality and tamper detection.
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">💾</div>
+      <div class="tech-name">Storage</div>
+      <div class="tech-title">Atomic Writes</div>
+      <div class="tech-desc">
+        Vault updates write to a temp file first, then atomically replace the old one.
+        No partial writes, no corruption risk on crash or power failure.
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">📋</div>
+      <div class="tech-name">Access</div>
+      <div class="tech-title">Clipboard Delivery</div>
+      <div class="tech-desc">
+        Retrieved keys are copied directly to your clipboard — never printed to
+        terminal output, protecting against shell history and screen captures.
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">📁</div>
+      <div class="tech-name">File I/O</div>
+      <div class="tech-title">Dotenv Compatible</div>
+      <div class="tech-desc">
+        Import entries from <code>NAME=KEY</code> formatted files in bulk.
+        Export your vault back out to the same format for use in other tools.
+      </div>
+    </div>
+    <div class="tech-card">
+      <div class="tech-icon">⚡</div>
+      <div class="tech-name">Interface</div>
+      <div class="tech-title">Typer CLI</div>
+      <div class="tech-desc">
+        Built with Typer for a fast, clean command-line experience with
+        auto-generated help text and argument validation out of the box.
+      </div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- COMMANDS -->
+<section id="commands">
+  <p class="section-label">Command reference</p>
+  <h2 class="section-title">EVERYTHING<br>YOU NEED.</h2>
+
+  <div class="commands-grid reveal">
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo init</div>
+      <div class="cmd-args">—</div>
+      <div class="cmd-desc">Create and initialize a new encrypted vault. Sets your master password. Run this once before anything else.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo add</div>
+      <div class="cmd-args">&lt;name&gt;</div>
+      <div class="cmd-desc">Add a new API key entry to the vault. Prompts securely for the key value. Optionally replaces an existing entry by name.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo get</div>
+      <div class="cmd-args">&lt;name&gt; [--show]</div>
+      <div class="cmd-desc">Retrieve a key by name. Copies it to clipboard. Use <code>--show</code> to display the key value directly in terminal.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo get-index</div>
+      <div class="cmd-args">&lt;index&gt; [--show]</div>
+      <div class="cmd-desc">Retrieve a key by its numeric index. Useful for quick access when you know the list order.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo list</div>
+      <div class="cmd-args">[--show] [--output &lt;file&gt;]</div>
+      <div class="cmd-desc">List all vault entries. Add <code>--show</code> to reveal keys. Use <code>--output</code> to write entries to a file.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo add-file</div>
+      <div class="cmd-args">&lt;path&gt;</div>
+      <div class="cmd-desc">Bulk-import entries from a <code>NAME=KEY</code> formatted file. Processes every line and adds each as a vault entry.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo delete</div>
+      <div class="cmd-args">&lt;name&gt;</div>
+      <div class="cmd-desc">Delete a vault entry by name. Requires confirmation before removal. This action is permanent and cannot be undone.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo delete-index</div>
+      <div class="cmd-args">&lt;index&gt;</div>
+      <div class="cmd-desc">Delete a vault entry by its index. Requires confirmation. Permanent operation — use with care.</div>
+    </div>
+    <div class="cmd-card">
+      <div class="cmd-name">ankylo delete-vault</div>
+      <div class="cmd-args">—</div>
+      <div class="cmd-desc">Permanently destroy the entire vault and all stored keys. Requires master password verification before deletion.</div>
+    </div>
+  </div>
+</section>
+
+<hr class="divider"/>
+
+<!-- INSTALL -->
+<section id="install">
+  <p class="section-label">Installation</p>
+  <h2 class="section-title">UP IN<br>SECONDS.</h2>
+
+  <div class="install-block reveal">
+    <div class="install-option">
+      <div class="install-label">Option 1 — install from GitHub</div>
+      <div class="code-line">
+        <span class="prompt">$</span>
+        <span class="code-text">pip install git+https://github.com/Iced-code/ankylo.git</span>
+      </div>
+    </div>
+    <div class="install-option">
+      <div class="install-label">Option 2 — clone and install</div>
+      <div class="code-line">
+        <span class="prompt">$</span>
+        <span class="code-text">git clone https://github.com/Iced-code/ankylo.git</span>
+      </div>
+      <div class="code-line">
+        <span class="prompt">$</span>
+        <span class="code-text">cd ankylo</span>
+      </div>
+      <div class="code-line">
+        <span class="prompt">$</span>
+        <span class="code-text">pip install .</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="quickstart-block reveal" style="margin-top: 2rem;">
+    <div class="qs-step">
+      <span class="qs-num">01</span>
+      <div class="qs-content">
+        <div class="qs-cmd">ankylo init</div>
+        <div class="qs-note">Create your vault and set a master password</div>
+      </div>
+    </div>
+    <div class="qs-step">
+      <span class="qs-num">02</span>
+      <div class="qs-content">
+        <div class="qs-cmd">ankylo add openai</div>
+        <div class="qs-note">Add your first entry — you'll be prompted for the key value</div>
+      </div>
+    </div>
+    <div class="qs-step">
+      <span class="qs-num">03</span>
+      <div class="qs-content">
+        <div class="qs-cmd">ankylo get openai</div>
+        <div class="qs-note">Key copied to clipboard. Paste it wherever you need it.</div>
+      </div>
+    </div>
+    <div class="qs-step">
+      <span class="qs-num">04</span>
+      <div class="qs-content">
+        <div class="qs-cmd">ankylo list</div>
+        <div class="qs-note">See all stored entries and their timestamps</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<footer>
+  <div class="footer-left">ankylo · local-first encrypted key vault · MIT license</div>
+  <div class="footer-links">
+    <a href="https://github.com/Iced-code/ankylo">GitHub</a>
+    <a href="https://github.com/Iced-code/ankylo/issues">Issues</a>
+    <a href="https://github.com/Iced-code/ankylo/blob/main/README.md">Docs</a>
+  </div>
+</footer>
+
+<script>
+  // Scroll reveal
+  const observer = new IntersectionObserver((entries) => {
+    entries.forEach(e => {
+      if (e.isIntersecting) {
+        e.target.classList.add('visible');
+        observer.unobserve(e.target);
+      }
+    });
+  }, { threshold: 0.08 });
+
+  document.querySelectorAll('.reveal').forEach(el => observer.observe(el));
+
+  // Subtle glow follows cursor
+  const orb = document.querySelector('.glow-orb');
+  document.addEventListener('mousemove', (e) => {
+    const x = e.clientX - 300;
+    const y = e.clientY - 300;
+    orb.style.transform = `translate(${x * 0.03}px, ${y * 0.03}px)`;
+  });
+</script>
+</body>
 </html>

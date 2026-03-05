@@ -21,15 +21,16 @@ def detail(msg: str):
     typer.secho(f"{msg}", fg=typer.colors.BRIGHT_BLUE, bold=True)
 
 
-BASE_DIR = Path.home() / ".ankylo"
+BASE_DIR = Path.home() / "ankylo"
 LOGSFILE = BASE_DIR / "./logs/logs.txt"
 
 def log_outputs(logsFilePath: Path, message: str):
     logsFilePath.parent.mkdir(parents=True, exist_ok=True)
 
-    with open(logsFilePath, "a") as logFile:
-        now = datetime.now()
-        logFile.write(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}]: {message.replace('\n', ' ').strip()}\n")
+    if message["log_action"]:
+        with open(logsFilePath, "a") as logFile:
+            now = datetime.now()
+            logFile.write(f"[{now.strftime('%Y-%m-%d %H:%M:%S')}]: {message.replace('\n', ' ').strip()}\n")
 
 def output_message(message_protocol: dict):
     status:str = message_protocol["status"]
@@ -69,10 +70,10 @@ def initialize_vault():
 @app.command("add", help="Add an entry to the vault.")
 def add_entry_to_vault(
     name: Optional[str] = typer.Option(None, "--name", "-n", help="Name of entry to add."),
-    file: Optional[str] = typer.Option(None, "--file", "-f", help="File path for the content to add."),
+    file: Optional[str] = typer.Option(None, "-in", help="File path for the content to add."),
 ):
     if (name and file) or (name is None and file is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or --file")
+        result = gen_message(status="ERROR", message="Must provide either --name or -in", log_action=False)
     elif name:
         result = add_entry(name=name)
     elif file is not None:
@@ -82,9 +83,11 @@ def add_entry_to_vault(
 
 @app.command("list", help="List all entries in the vault")
 def list_vault_entries(
-    show: bool = typer.Option(False, "--show", help="Display all entries' secret key.")
+    show: bool = typer.Option(False, "--show", help="Display all entries' secret key."),
+    outputFile: str = typer.Option(None, "-out", help="File to write entries and their keys to.")
 ):
-    result = list_entries(show=show)
+    result = list_entries(show=show, outputFile=outputFile)
+    
     if result["result"]:
         print("")
         for index, entry in result["result"].items():
@@ -101,7 +104,7 @@ def get_vault_entry(
     show: bool = typer.Option(False, "--show", help="Display the entry's secret key.")
 ):
     if (name and index) or (name is None and index is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or --index")
+        result = gen_message(status="ERROR", message="Must provide either --name or --index", log_action=False)
     elif name:
         result = get_entry(name=name, show=show)
     elif index is not None:
@@ -119,7 +122,7 @@ def delete_vault_entry(
     index: Optional[int] = typer.Option(None, "--index", "-i", help='Index of entry to delete'),
 ):
     if (name and index) or (name is None and index is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or --index")
+        result = gen_message(status="ERROR", message="Must provide either --name or --index", log_action=False)
     elif name:
         result = delete_entry(name=name)
     elif index is not None:

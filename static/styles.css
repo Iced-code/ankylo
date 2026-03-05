@@ -12,7 +12,7 @@
 
 body {
     font-family: 'Inter', -apple-system, sans-serif;
-    background-color: var(--bg);
+    background: linear-gradient(135deg, rgb(0, 27, 86), #304d80)/* var(--bg) */;
     color: var(--text);
     line-height: 1.6;
 }
@@ -47,11 +47,27 @@ body {
     padding: 100px 5%;
 }
 
+.poppins-regular {
+  font-family: "Poppins", sans-serif;  font-family: "Poppins", sans-serif;
+  font-weight: 400;
+  font-style: normal;
+}
+.poppins-bold {
+  font-family: "Poppins", sans-serif;  font-family: "Poppins", sans-serif;
+  font-weight: 700;
+  font-style: normal;
+}
+
 .hero h1 {
     font-size: 5rem;
     letter-spacing: -2px;
     margin-bottom: 10px;
     font-weight: 300;
+
+    font-family: 'Poppins', sans-serif;
+    background: linear-gradient(90deg, #304d80, #65b5e2);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
 }
 
 .hero .bold { font-weight: 800; color: var(--accent); }
@@ -122,25 +138,6 @@ footer {
 
 
 
-
-
-
-
-html {
-    -ms-text-size-adjust: 100%;
-    -webkit-text-size-adjust: 100%
-}
-
-body {
-    margin: 0
-}
-
-html,
-body {
-    font-family: Verdana, sans-serif;
-    font-size: 15px;
-    line-height: 1.5
-}
 
 /* body {
     background: linear-gradient(150deg, white, white, rgb(14, 41, 78));
