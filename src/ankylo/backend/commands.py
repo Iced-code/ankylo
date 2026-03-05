@@ -286,9 +286,10 @@ def export_entries_file(outputFile:str, names:list[str]=None, indices:list[int]=
     if len(vault) == 0:
         return gen_message(status="", message=f"Vault is empty.\nExport cancelled.")
 
+    # export with -n
     if names:
         filtered_vault =  [entry for entry in vault["entries"] if entry["name"] in names]
-    elif indices:
+    elif indices:   # export with -i
         filtered_vault = []
         for i in indices:
             if abs(i) >= len(vault["entries"]):
@@ -305,7 +306,7 @@ def export_entries_file(outputFile:str, names:list[str]=None, indices:list[int]=
     if outputFile and filtered_vault:
         with open(outputFile, "w") as file:
             for e in filtered_vault:
-                file.write(f'\n{e["name"]}={e["key"]}')
+                file.write(f'\n{e["name"].upper().replace("-", "_").replace(" ", "_")}={e["key"].strip()}')
         return gen_message(status="OK", message=f"Entries successfully exported to file '{outputFile}'.")
 
     return gen_message(status="ERROR", message=f"Unable to export entries to this file.")
@@ -393,7 +394,7 @@ def export_entry(name:str, shell:str, key:str=None, vault:dict=None):
         if entry["name"] == name:
             var_name = name.upper().replace("-", "_").replace(" ", "_")
 
-            output = gen_message(status="OK", message=f"Exported entry {name} as {shell} environment variable.")
+            output = gen_message(status="OK", message=f"Exported entry '{name}' as {shell} environment variable '{var_name}'.")
             if shell == "powershell" or shell == "ps":
                 output["result"] = {"env_var": f'$env:{var_name}="{entry["key"]}"'}
             elif shell == "cmd":
@@ -432,7 +433,7 @@ def delete_entry(name:str, key:str=None, vault:dict=None):
     original_data = load_vault_file()
     save_vault(key=key, vault_dict=vault, original_data=original_data)
 
-    if num_entries >= len(vault["entries"]):
+    if num_entries <= len(vault["entries"]):
         return gen_message(status="", message=f"Entry '{name}' could not be found.")
 
     return gen_message(status="OK", message=f"Deleted '{name}' entry.")

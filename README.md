@@ -30,7 +30,6 @@ ankylo get -n github --show
 
 ## Learn more
 [https://iced-code.github.io/ankylo/]
-(https://iced-code.github.io/ankylo/)
 
 ## Credits
 Created by Ayaan Modak.

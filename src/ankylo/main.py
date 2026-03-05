@@ -58,7 +58,7 @@ def main(
         raise typer.Exit()
 
     if ctx.invoked_subcommand is None:
-        detail(msg="\nankylo - Secure API Key Vault")
+        detail(msg="\nankylo - Secure key vault right in your terminal.")
         typer.echo(ctx.get_help())
         info(msg="Examples:")
         typer.echo("""  ankylo init\n  ankylo add -n github\n  ankylo get -n github --show""")
@@ -167,18 +167,21 @@ def delete_entire_vault():
 
 @app.command("env", help="Export an entry as an environment variable.")
 def export_entry_env(
-    name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to export.'),
+    name: Optional[str] = typer.Argument(None, help='Name of entry to export.'),
     shell: Optional[str] = typer.Option("bash", "--shell", "-s", help='Shell format: bash, powershell, cmd')
 ):
     if name is None:
-        result = gen_message(status="ERROR", message="Must provide --name", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide name argument", log_action=False)
     elif name:
         result = export_entry(name=name, shell=shell)
     
     if result["result"]:
-        detail(f"\n{result["result"]["env_var"]}")
+        detail(f"{result["result"]["env_var"]}")
 
-    output_message(result)
+    if result["status"] == "OK":
+        log_outputs(logsFilePath=LOGSFILE, message=result["message"])
+    else:
+        output_message(result)
 
 
 def main():
