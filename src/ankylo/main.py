@@ -1,6 +1,6 @@
 from datetime import datetime
 from pathlib import Path
-from ankylo.backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index, gen_message
+from ankylo.backend.commands import create_vault, unlock_vault, save_vault, add_entry, list_entries, get_entry, get_entry_index, delete_entry, delete_entry_index, gen_message, add_entries_from_file
 import typer
 from typing import Optional
 
@@ -68,9 +68,16 @@ def initialize_vault():
 
 @app.command("add", help="Add an entry to the vault.")
 def add_entry_to_vault(
-    name: str = typer.Option(None, "--name", "-n", help="Name of entry to add."),
+    name: Optional[str] = typer.Option(None, "--name", "-n", help="Name of entry to add."),
+    file: Optional[str] = typer.Option(None, "--file", "-f", help="File path for the content to add."),
 ):
-    result = add_entry(name=name)
+    if (name and file) or (name is None and file is None):
+        result = gen_message(status="ERROR", message="Must provide either --name or --file")
+    elif name:
+        result = add_entry(name=name)
+    elif file is not None:
+        result = add_entries_from_file(file_path=file)
+    
     output_message(result)
 
 @app.command("list", help="List all entries in the vault")
@@ -102,8 +109,8 @@ def get_vault_entry(
     
     if result["result"]:
         print("")
-        for name, api_key in result["result"].items():
-            detail(f'- {name}: {api_key}')
+        detail(f'- {result["result"]["name"]}: {result["result"]["key"]} (created: {result["result"]["timestamp"]})')
+
     output_message(result)
 
 @app.command("delete", help="Delete an entry from the vault.")

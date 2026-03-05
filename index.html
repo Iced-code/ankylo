@@ -4,22 +4,17 @@
         <meta charset="UTF-8">
         <meta name="viewport" content="width=device-width, initial-scale=1.0">
         <title>ankylo | Python Tool</title>
-
-        <link rel="preconnect" href="https://fonts.googleapis.com">
-        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
-        <link href="https://fonts.googleapis.com/css2?family=Google+Sans:ital,opsz,wght@0,17..18,400..700;1,17..18,400..700&family=Montserrat:ital,wght@0,100..900;1,100..900&family=Playwrite+NZ+Basic:wght@100..400&family=Poppins:ital,wght@0,100;0,200;0,300;0,400;0,500;0,600;0,700;0,800;0,900;1,100;1,200;1,300;1,400;1,500;1,600;1,700;1,800;1,900&display=swap" rel="stylesheet">
-
         <link rel="stylesheet" href="static/styles.css">
     </head>
     <body>
         <header>
             <nav class="navbar">
                 <div class="logo">
-                    <a href=""><img src="./static/logo.png" alt="Ankylo Logo"></a>
+                    <a href="#"><img src="./static/logo.png" alt="Ankylo Logo"></a>
                 </div>
                 <ul class="nav-links">
                     <li><a href="#">Home</a></li>
-                    <li><a href="#">About</a></li>
+                    <li><a href="#features">Features</a></li>
                     <li><a href="#install">Install</a></li>
                 </ul>
             </nav>
@@ -27,19 +22,57 @@
 
         <main class="content">
             <section class="hero">
-                <!-- <img src="./static/logo.png" alt="Ankylo Logo"> -->
-                <h1><span style="font-weight: bold;">a</span><span style="font-weight: 350;">nkyl</span><span style="font-weight: bold;">o</span></h1>
-                <h3 style="font-weight: bold;">Your keys, together and secure.</h3>
+                <h1><span class="bold">a</span>nkyl<span class="bold">o</span></h1>
+                <p class="subtitle">Your keys, together and secure.</p>
+                <div class="hero-cta">
+                    <a href="#install" class="btn">Get Started</a>
+                </div>
             </section>
-        
-            <section class="installation" id="install">
-                <h2>Option 1: Quick Install</h2>
-                <pre><code>pip install git+https://github.com/Iced-code/ankylo.git</code></pre>
 
-                <h2>Option 2: Build from Source</h2>
-                <pre><code>git clone https://github.com/Iced-code/ankylo.git
-cd ankylo
-pip install .</code></pre>
+            <section id="features" class="features-grid">
+                <div class="card">
+                    <h3>Strong Cryptography</h3>
+                    <p>Argon2id for key derivation and AES-256-GCM for authenticated encryption.</p>
+                </div>
+                <div class="card">
+                    <h3>Security-First</h3>
+                    <p>Zero-knowledge style vault. Atomic file writes to prevent corruption.</p>
+                </div>
+                <div class="card">
+                    <h3>Developer CLI</h3>
+                    <p>Built with Typer for a clean, intuitive command-line experience.</p>
+                </div>
+                <div class="card">
+                    <h3>Fully Local</h3>
+                    <p>Lightweight, no external dependencies, and clipboard integration.</p>
+                </div>
+            </section>
+
+            <section class="code-section" id="install">
+                <div class="code-header">
+                    <h2>Installation</h2>
+                </div>
+                <div class="code-snippet">
+                    <p>Quick Install</p>
+                    <pre><code>pip install git+https://github.com/Iced-code/ankylo.git</code></pre>
+                </div>
+                <div class="code-snippet">
+                    <p>Build from Source</p>
+                    <pre><code>git clone https://github.com/Iced-code/ankylo.git
+        cd ankylo
+        pip install .</code></pre>
+                </div>
+            </section>
+
+            <section class="code-section" id="usage">
+                <div class="code-header">
+                    <h2>Usage</h2>
+                </div>
+                <div class="code-snippet">
+                    <pre><code>ankylo init
+        ankylo add -n github
+        ankylo get -n github --show</code></pre>
+                </div>
             </section>
         </main>
 

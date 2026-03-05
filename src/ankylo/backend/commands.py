@@ -3,6 +3,7 @@ import json
 import getpass
 import pyperclip
 import uuid
+from datetime import datetime
 
 from ankylo.backend.crypto import derive_key, encrypt_data, decrypt_data
 from ankylo.backend.storage import vault_exists, load_vault_file, write_atomically, b64e, b64d
@@ -145,7 +146,7 @@ def delete_vault():
     vault_data = load_vault_file()
 
     if vault_data is None:
-        return gen_message("ERROR", "Failed to load vault.")
+        return gen_message("ERROR", "Vault could not be found.")
 
     password = getpass.getpass("Master password: ")
 
@@ -195,28 +196,59 @@ def add_entry(name:str, api_key:str=None, key:str=None, vault:dict=None, entry_i
     if not entry_index: # when running CLI
         for index, entry in enumerate(vault["entries"]):
             if entry["name"].lower() == name.lower():
-                replace = input("Entry already exists. Replace key for this entry? (Y/N): ").upper() == "Y"
+                replace = input(f"An entry named '{name}' already exists. Replace key for this entry? (Y/N): ").upper() == "Y"
                 if not replace:
                     return gen_message(status="", message=f"Key was not replaced for the entry.")
                 else:
                     entry_index = index
                     break
 
+    now = datetime.now()
     if (entry_index is not None) and entry_index != -1:   # Replaces api_key index for existing entry.   
         vault["entries"][entry_index] = ({
             "name": name,
-            "key": api_key
+            "key": api_key,
+            "timestamp": f"{now.strftime('%Y-%m-%d %H:%M:%S')}"
         })
     else:
         vault["entries"].append({
             "name": name,
-            "key": api_key
+            "key": api_key,
+            "timestamp": f"{now.strftime('%Y-%m-%d %H:%M:%S')}"
         })
 
     original_data = load_vault_file()
     save_vault(key=key, vault_dict=vault, original_data=original_data)
 
     return gen_message(status="OK", message=f"Added '{name}' to vault.")
+
+'''
+Add entries from a given file path to the vault.
+
+Args:
+    file_path (str): Path to file with the entries to add.
+    key (str= None): The key to the vault.
+    vault (dict= None): The vault.
+
+Returns:
+    The formatted message protocol from the parameters passed into gen_message(...).
+'''
+def add_entries_from_file(file_path:str, key:str=None, vault:dict=None):
+    if not key: # when running CLI 
+        key, vault, message = unlock_vault()
+        if not key:
+            return message
+
+    try:
+        with open(file_path, "r") as fileInput:
+            for line in fileInput:
+                entry = line.strip().split("=")
+                add_entry(name=entry[0], api_key=entry[-1], key=key, vault=vault)
+    except FileNotFoundError:
+        return gen_message(status="ERROR", message=f"File was not found.")
+
+    return gen_message(status="OK", message=f"Added file contents to vault.")
+
 
 '''
 Lists all entries in the vault.
@@ -265,7 +297,10 @@ def get_entry(name:str, key:str=None, vault:dict=None, show:bool=False):
             pyperclip.copy(entry["key"])
             output = gen_message(status="OK", message=f"Accessed '{name}' entry.\nAPI Key copied to clipboard.")
             if show:
-                output["result"] = {entry["name"]: entry["key"]}
+                output["result"] = {"name": entry["name"], "key": entry["key"], "timestamp": entry["timestamp"]}
+            else:
+                output["result"] = {"name": entry["name"], "key": "", "timestamp": entry["timestamp"]}
+
             return output
 
     return gen_message(status="ERROR", message=f"Entry '{name}' not found.", log_action=True)
@@ -294,6 +329,13 @@ def get_entry_index(index: int, key:str=None, vault:dict=None, show:bool=False):
     output = gen_message(status="OK", message=f"Accessed '{vault["entries"][index]["name"]}' entry.\nAPI Key copied to clipboard.")
     if show:
             output["result"] = {vault["entries"][index]["name"]: vault["entries"][index]["key"]}
+
+
+    if show:
+        output["result"] = {"name": vault["entries"][index]["name"], "key": vault["entries"][index]["key"], "timestamp": vault["entries"][index]["timestamp"]}
+    else:
+       output["result"] = {"name": vault["entries"][index]["name"], "key": "", "timestamp": vault["entries"][index]["timestamp"]}
+
     return output
 
 '''

@@ -2,6 +2,7 @@
 
 # ankylo
 
+Your secrets, together and secure.
 Secure vault
 
 
@@ -21,10 +22,11 @@ pip install .
 
 ## Usage
 ```
+ankylo
 ankylo init
 ankylo add -n github
 ankylo get -n github --show
 ```
 
 ## Credits
-Created by Ayaan Modak
+Created by Ayaan Modak.
