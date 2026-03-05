@@ -144,7 +144,7 @@ def delete_entire_vault():
     result = delete_vault()
     output_message(result)
 
-@app.command("env", help="Export entries as environment variables")
+@app.command("env", help="Export an entrry as an environment variable.")
 def export_entry_env(
     name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to export.'),
     shell: Optional[str] = typer.Option("bash", "--shell", "-s", help='Shell format: bash, powershell, cmd')

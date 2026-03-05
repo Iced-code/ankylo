@@ -6,7 +6,6 @@
 
 ankylo is an encrypted, local-first key vault that lives entirely in your terminal. Store, retrieve, manage, and inject API keys without ever touching a browser or plaintext file.
 
-
 ## Installation
 
 ### Option 1: Install from GitHub
@@ -28,6 +27,10 @@ ankylo init
 ankylo add -n github
 ankylo get -n github --show
 ```
+
+## Learn more
+[https://iced-code.github.io/ankylo/]
+(https://iced-code.github.io/ankylo/)
 
 ## Credits
 Created by Ayaan Modak.

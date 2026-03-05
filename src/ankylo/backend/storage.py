@@ -4,7 +4,7 @@ import base64
 import tempfile
 from pathlib import Path
 
-BASE_DIR = Path.home() / "ankylo"
+BASE_DIR = Path.home() / ".ankylo"
 VAULT_FILE = BASE_DIR / "vault.json"
 
 '''
