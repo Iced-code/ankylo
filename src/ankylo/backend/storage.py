@@ -34,6 +34,8 @@ Args:
 '''
 def write_atomically(data: dict):
     dir_name = os.path.dirname(VAULT_FILE) or "."
+    os.makedirs(dir_name, exist_ok=True)
+
     with tempfile.NamedTemporaryFile("w", dir=dir_name, delete=False) as tmp:
         json.dump(data, tmp)
         temp_name = tmp.name
