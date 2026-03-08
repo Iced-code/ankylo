@@ -456,7 +456,7 @@ footer {
     letter-spacing: 0.08em;
 }
 
-.footer-links a {
+.footer-links, .footer-links a {
     font-size: 0.65rem;
     color: var(--muted);
     text-decoration: none;
