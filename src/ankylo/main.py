@@ -5,11 +5,11 @@ from ankylo.backend.storage import BASE_DIR
 import typer
 from typing import Optional, List
 
-# Developed by Ayaan Modak (GitHub: Iced-Code)
+# Developed by Ayaan Modak (GitHub: Iced-code)
 
 app = typer.Typer()
 
-VERSION = "ankylo-v1.0"
+VERSION = "ankylo-v1.1"
 
 def success(msg: str):
     typer.secho(f"{msg}", fg=typer.colors.GREEN, bold=True)
@@ -61,7 +61,7 @@ def main(
         detail(msg="\nankylo - Secure key vault right in your terminal.")
         typer.echo(ctx.get_help())
         info(msg="Examples:")
-        typer.echo("""  ankylo init\n  ankylo add -n github\n  ankylo get -n github --show""")
+        typer.echo("""  ankylo init\n  ankylo add openai\n  ankylo get openai --show""")
         raise typer.Exit()
 
 @app.command("init", help="Create the vault.")
@@ -71,11 +71,11 @@ def initialize_vault():
 
 @app.command("add", help="Add an entry to the vault.")
 def add_entry_to_vault(
-    name: Optional[str] = typer.Option(None, "--name", "-n", help="Name of entry to add."),
+    name: Optional[str] = typer.Argument(None, help="Name of entry to add."),
     file: Optional[str] = typer.Option(None, "-in", help="File path for the content to add."),
 ):
     if (name and file) or (name is None and file is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or -in", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide either <name> or -in <file_path>", log_action=False)
     elif name:
         result = add_entry(name=name)
     elif file is not None:
@@ -100,12 +100,12 @@ def list_vault_entries(
 
 @app.command("get", help="Get an entry from the vault.")
 def get_vault_entry(
-    name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to get.'),
+    name: Optional[str] = typer.Argument(None, help='Name of entry to get.'),
     index: Optional[int] = typer.Option(None, "--index", "-i", help='Index of entry to get.'),
     show: bool = typer.Option(False, "--show", help="Display the entry's secret key.")
 ):
     if (name and index) or (name is None and index is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or --index", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide either <name> or --index <entry_index>", log_action=False)
     elif name:
         result = get_entry(name=name, show=show)
     elif index is not None:
@@ -120,7 +120,7 @@ def get_vault_entry(
 @app.command("export", help="Export entries to a file.")
 def export_vault_entries(
     outputFile: str = typer.Option(None, "-out", help="File to write entries and their keys to."),
-    names: Optional[List[str]] = typer.Option(None, "--name", "-n", help='Names of entries to export.'),
+    names: Optional[List[str]] = typer.Argument(None, help='Names of entries to export.'),
     indices: Optional[List[int]] = typer.Option(None, "--index", "-i", help='Indices of entries to export.'),
     all_entries: Optional[str] = typer.Argument(None, help='Use "." to export all entries.'),
 ):
@@ -129,23 +129,23 @@ def export_vault_entries(
     elif all_entries == '.':
         result = export_entries_file(outputFile=outputFile, names=None)
     elif names and indices:
-        result = gen_message(status="ERROR", message="Must provide --name or --index, not both", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide either <name> or --index <index>", log_action=False)
     elif names:
         result = export_entries_file(outputFile=outputFile, names=names)
     elif indices:
         result = export_entries_file(outputFile=outputFile, indices=indices)
     else:
-        result = gen_message(status="ERROR", message="Must provide --name or '.'", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide <name> or '.'", log_action=False)
 
     output_message(result)
 
 @app.command("delete", help="Delete an entry from the vault.")
 def delete_vault_entry(
-    name: Optional[str] = typer.Option(None, "--name", "-n", help='Name of entry to delete.'),
+    name: Optional[str] = typer.Argument(None, help='Name of entry to delete.'),
     index: Optional[int] = typer.Option(None, "--index", "-i", help='Index of entry to delete'),
 ):
     if (name and index) or (name is None and index is None):
-        result = gen_message(status="ERROR", message="Must provide either --name or --index", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide either <name> or --index <index>", log_action=False)
     elif name:
         result = delete_entry(name=name)
     elif index is not None:
@@ -171,7 +171,7 @@ def export_entry_env(
     shell: Optional[str] = typer.Option("bash", "--shell", "-s", help='Shell format: bash, powershell, cmd')
 ):
     if name is None:
-        result = gen_message(status="ERROR", message="Must provide name argument", log_action=False)
+        result = gen_message(status="ERROR", message="Must provide <name>", log_action=False)
     elif name:
         result = export_entry(name=name, shell=shell)
     

@@ -24,8 +24,8 @@ pip install .
 ```
 ankylo
 ankylo init
-ankylo add -n github
-ankylo get -n github --show
+ankylo add github
+ankylo get github --show
 ```
 
 ## Learn more

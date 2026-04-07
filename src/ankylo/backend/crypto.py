@@ -3,7 +3,7 @@ from argon2.low_level import hash_secret_raw, Type
 from cryptography.hazmat.primitives.ciphers.aead import AESGCM
 
 
-aad = b"ankylo-v1.0"
+aad = b"ankylo-v1.1"
 
 '''
 Key derivation using Argon2id.

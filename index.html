@@ -45,7 +45,7 @@
 
 <!-- HERO -->
 <section class="hero" id="about">
-  <div class="hero-badge">v1.0</div>
+  <div class="hero-badge">v1.1</div>
   <h1>YOUR <span class="accent">API KEYS</span><br>LIVE HERE NOW.</h1>
   <p class="hero-sub">
     <span style="font-weight: 400; color: white; text-decoration: underline #38bdf8; text-underline-offset: 0.4rem;">ankylo</span> is an encrypted, local-first key vault that lives entirely in your terminal.
@@ -164,12 +164,12 @@
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo add</div>
-      <div class="cmd-args">-n &lt;name&gt; &nbsp;|&nbsp; -in &lt;file&gt;</div>
-      <div class="cmd-desc">Add a single entry by name (<code>-n</code>), or bulk-import from a <code>NAME=KEY</code> formatted file (<code>-in</code>). Exactly one flag required.</div>
+      <div class="cmd-args">&lt;name&gt; &nbsp;|&nbsp; -in &lt;file&gt;</div>
+      <div class="cmd-desc">Add a single entry by name, or bulk-import from a <code>NAME=KEY</code> formatted file (<code>-in</code>). Exactly one flag required.</div>
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo get</div>
-      <div class="cmd-args">-n &lt;name&gt; &nbsp;|&nbsp; -i &lt;index&gt; &nbsp;[--show]</div>
+      <div class="cmd-args">&lt;name&gt; &nbsp;|&nbsp; -i &lt;index&gt; &nbsp;[--show]</div>
       <div class="cmd-desc">Retrieve a key by name or index. Copies it silently to clipboard. Pass <code>--show</code> to also print the key and timestamp to the terminal.</div>
     </div>
     <div class="cmd-card">
@@ -179,9 +179,9 @@
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo export</div>
-      <div class="cmd-args">-out &lt;file&gt; &nbsp;[-n &lt;name&gt;] &nbsp;[-i &lt;index&gt;] &nbsp;[.]</div>
+      <div class="cmd-args">-out &lt;file&gt; [&lt;name&gt; | -i &lt;index&gt; | '.']</div>
       <div class="cmd-desc">
-        Export entries to a <code>NAME=KEY</code> formatted file. Select by name, index, or pass <code>.</code> to export all. Flags <code>-n</code> and <code>-i</code> accept multiple values but cannot be combined.
+        Export entries to a <code>NAME=KEY</code> formatted file. Select by name, index, or pass <code>.</code> to export all.
       </div>
     </div>
     <div class="cmd-card">
@@ -199,7 +199,7 @@
     </div>
     <div class="cmd-card">
       <div class="cmd-name">ankylo delete</div>
-      <div class="cmd-args">-n &lt;name&gt; &nbsp;|&nbsp; -i &lt;index&gt;</div>
+      <div class="cmd-args">&lt;name&gt; &nbsp;|&nbsp; -i &lt;index&gt;</div>
       <div class="cmd-desc">Delete a vault entry by name or index. Prompts for confirmation before removal. Permanent — cannot be undone.</div>
     </div>
     <div class="cmd-card">
@@ -258,14 +258,14 @@
     <div class="qs-step">
       <span class="qs-num">02</span>
       <div class="qs-content">
-        <div class="qs-cmd">ankylo add -n openai</div>
+        <div class="qs-cmd">ankylo add openai</div>
         <div class="qs-note">Add your first entry — you'll be prompted for the key value</div>
       </div>
     </div>
     <div class="qs-step">
       <span class="qs-num">03</span>
       <div class="qs-content">
-        <div class="qs-cmd">ankylo get -n openai</div>
+        <div class="qs-cmd">ankylo get openai</div>
         <div class="qs-note">Key copied to clipboard. Paste it wherever you need it.</div>
       </div>
     </div>

@@ -8,7 +8,7 @@ from datetime import datetime
 from ankylo.backend.crypto import derive_key, encrypt_data, decrypt_data
 from ankylo.backend.storage import vault_exists, load_vault_file, write_atomically, b64e, b64d, VAULT_FILE
 
-VERSION = 1.0
+VERSION = 1.1
 
 '''
 Called to generate formatted message protocols.

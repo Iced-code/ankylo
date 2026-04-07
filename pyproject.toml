@@ -1,6 +1,6 @@
 [project]
 name = "ankylo"
-version = "1.0"
+version = "1.1"
 description = "Secure API key vault CLI"
 authors = [{ name = "Ayaan Modak (Iced-code)" }]
 readme = "README.md"
